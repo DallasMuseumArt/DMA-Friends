@@ -1,0 +1,75 @@
+When a user logs an activity:
+dma_create_checkin (badgeos-dma-platform/achievement-functions.php)
+	find_relevant_steps_and_maybe_award (badgeos-dma-platform/rules-engine.php)
+		dma_get_steps (badgeos-dma-platform/activity-functions.php)
+		badgestack_user_has_access_to_achievement (badge-plugin/includes/functions.php)
+			badgestack_get_parent_of_achievement
+			badgestack_is_achievement_sequential
+				badgestack_get_required_children_of_achievement [finds nothing]
+				badgestack_get_user_achievements (badge-plugin/includes/rules-engine.php)
+				returns filter "user_has_access_to_achievement"
+					dma_user_can_work_on_step (badgeos-dma-platform/rules-engine.php)
+		dma_user_deserves_step (badgeos-dma-platform/rules-engine.php)
+			badgestack_get_parent_of_achievement
+			dma_find_relevant_checkins_for_step (badgeos-dma-platform/rules-engine.php)
+				badgestack_get_parent_of_achievement
+				dma_badge_last_user_activity (badgeos-dma-platform/badge-functions.php)
+				dma_is_user_engaged_in_badge (badgeos-dma-platform/badge-functions.php)
+				dma_get_users_active_badge_details (badgeos-dma-platform/badge-functions.php)
+			dma_update_badge_used_checkins (badgeos-dma-platform/badge-functions.php)
+		badgestack_award_achievement_to_user [awards step] (badge-plugin/includes/rules-engine.php)
+			badgestack_get_user_achievements
+			applies filter 'achievement_object'
+				dma_awarded_achievement_object_details (badgeos-dma-platform/achievement-functions.php)
+			updates user meta '_badgestack_achievements'
+			badgestack_post_log_entry
+			does action "badgestack_award_achievement"
+				dma_save_badge_data (badgeos-dma-platform/badge-functions.php)
+					badgestack_get_parent_of_achievement
+					dma_is_user_engaged_in_badge (badgeos-dma-platform/badge-functions.php)
+					dma_get_users_active_fun_badge_details
+					dma_update_users_active_fun_badges (badgeos-dma-platform/badge-functions.php)
+						dma_get_users_active_fun_badges (badgeos-dma-platform/badge-functions.php)
+						update user meta '_dma_active_badges'
+				dma_maybe_delete_active_badge (badgeos-dma-platform/badge-functions.php)
+					dma_delete_active_fun_badge (badgeos-dma-platform/badge-functions.php)
+						dma_get_users_active_fun_badges (badgeos-dma-platform/badge-functions.php)
+						update user meta '_dma_active_badges'
+			badgestack_get_related_achievements [finds badges] (badge-plugin/includes/rules-engine.php)
+				badgestack_check_and_maybe_award_achievement_to_user (badge-plugin/includes/rules-engine.php)
+				badgestack_check_achievement_completion_for_user (badge-plugin/includes/rules-engine.php)
+					badgestack_check_if_user_has_achievement (badge-plugin/includes/rules-engine.php)
+						badgestack_get_user_achievements (badge-plugin/includes/rules-engine.php)
+					badgestack_get_required_achievements_for_achievement [finds steps] (badge-plugin/includes/rules-engine.php)
+					badgestack_check_achievement_completion_for_user (badge-plugin/includes/rules-engine.php)
+					returns filter "user_deserves_achievement"
+						dma_user_deserves_badge (badgeos-dma-platform/rules-engine.php)
+							dma_badge_last_user_activity (badgeos-dma-platform/badge-functions.php)
+							badgestack_get_required_achievements_for_achievement [finds steps] (badge-plugin/includes/rules-engine.php)
+							 badgestack_check_if_user_has_achievement (badge-plugin/includes/rules-engine.php)
+								badgestack_get_user_achievements (badge-plugin/includes/rules-engine.php)
+							 badgestack_check_achievement_completion_for_user (badge-plugin/includes/rules-engine.php)
+						dma_user_deserves_step_filter_wrapper (badgeos-dma-platform/rules-engine.php)
+							dma_user_deserves_step (badgeos-dma-platform/rules-engine.php)
+								badgestack_get_parent_of_achievement
+								dma_find_relevant_checkins_for_step (badgeos-dma-platform/rules-engine.php)
+									badgestack_get_parent_of_achievement
+									dma_badge_last_user_activity (badgeos-dma-platform/badge-functions.php)
+									dma_is_user_engaged_in_badge (badgeos-dma-platform/badge-functions.php)
+									dma_get_users_active_badge_details (badgeos-dma-platform/badge-functions.php)
+								dma_update_badge_used_checkins (badgeos-dma-platform/badge-functions.php)
+				badgestack_award_achievement_to_user [awards badge]
+					does action "badgestack_award_achievement"
+						dma_save_badge_data (badgeos-dma-platform/badge-functions.php)
+							badgestack_get_parent_of_achievement
+							dma_is_user_engaged_in_badge (badgeos-dma-platform/badge-functions.php)
+							dma_get_users_active_badge_details dma_get_users_active_badge_details
+							dma_update_users_active_fun_badges (badgeos-dma-platform/badge-functions.php)
+								dma_get_users_active_fun_badges (badgeos-dma-platform/badge-functions.php)
+								update user meta '_dma_active_badges'
+						dma_maybe_delete_active_badge (badgeos-dma-platform/badge-functions.php)
+							dma_delete_active_badge (badgeos-dma-platform/badge-functions.php)
+								dma_get_users_active_badges (badgeos-dma-platform/badge-functions.php)
+								delete user meta '_dma_badge_already_used_activity_time_' . $badge_id
+								update user meta '_dma_active_badges'
+					badgestack_get_related_achievements [finds nothing, stops here]

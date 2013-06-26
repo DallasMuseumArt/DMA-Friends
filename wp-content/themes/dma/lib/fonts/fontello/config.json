@@ -1,0 +1,383 @@
+{
+  "name": "",
+  "glyphs": [
+    {
+      "search": [
+        "home"
+      ],
+      "code": 8962,
+      "uid": "513ac180ff85bd275f2b736720cbbf5e",
+      "css": "home",
+      "orig_css": "home",
+      "orig_code": 8962,
+      "src": "entypo",
+      "from": 8962
+    },
+    {
+      "search": [
+        "home"
+      ],
+      "code": 59392,
+      "from": 8962,
+      "uid": "w3nzesrlbezu6f30q7ytyq919p6gdlb6",
+      "css": "home-1",
+      "orig_css": "home",
+      "orig_code": 59392,
+      "src": "typicons"
+    },
+    {
+      "search": [
+        "heart"
+      ],
+      "code": 9829,
+      "uid": "0eabe5f8d71cc838484ff39436426d2d",
+      "css": "heart",
+      "orig_css": "heart",
+      "orig_code": 9829,
+      "src": "entypo",
+      "from": 9829
+    },
+    {
+      "search": [
+        "attention",
+        "warning",
+        "alert"
+      ],
+      "code": 9888,
+      "uid": "97902f87200ce74d181044df02a0458d",
+      "css": "attention",
+      "orig_css": "attention",
+      "orig_code": 9888,
+      "src": "entypo",
+      "from": 9888
+    },
+    {
+      "search": [
+        "record",
+        "player"
+      ],
+      "code": 9899,
+      "from": 9899,
+      "uid": "e188c02f740feff7e2d2bce1950b75fa",
+      "css": "record",
+      "orig_css": "record",
+      "orig_code": 9899,
+      "src": "entypo"
+    },
+    {
+      "search": [
+        "ok",
+        true,
+        "check",
+        "mark"
+      ],
+      "code": 10003,
+      "uid": "14017aae737730faeda4a6fd8fb3a5f0",
+      "css": "check",
+      "orig_css": "check",
+      "orig_code": 10003,
+      "src": "entypo",
+      "from": 10003
+    },
+    {
+      "search": [
+        "close",
+        "cancel",
+        "reject"
+      ],
+      "code": 10005,
+      "from": 10005,
+      "uid": "c709da589c923ba3c2ad48d9fc563e93",
+      "css": "cancel",
+      "orig_css": "cancel",
+      "orig_code": 10005,
+      "src": "entypo"
+    },
+    {
+      "search": [
+        "close",
+        "cancel",
+        "reject"
+      ],
+      "code": 59393,
+      "from": 10005,
+      "uid": "1dq4tek4k8ea7zlj4kc3w83itnutaxg5",
+      "css": "cancel-2",
+      "orig_css": "cancel",
+      "orig_code": 59393,
+      "src": "typicons"
+    },
+    {
+      "search": [
+        "list"
+      ],
+      "code": 57349,
+      "uid": "3626b3f3a0b284e7f4166b815719aece",
+      "css": "list",
+      "orig_css": "list",
+      "orig_code": 57349,
+      "src": "entypo",
+      "from": 57349
+    },
+    {
+      "search": [
+        "help",
+        "question"
+      ],
+      "code": 59140,
+      "uid": "de9a631a7d18106aea1c89ba51b1990a",
+      "css": "help-circled",
+      "orig_css": "help-circled",
+      "orig_code": 59140,
+      "src": "entypo",
+      "from": 59140
+    },
+    {
+      "search": [
+        "location",
+        "mark",
+        "marker"
+      ],
+      "code": 59172,
+      "uid": "a42b598e4298f3319b25a2702a02e7ff",
+      "css": "location",
+      "orig_css": "location",
+      "orig_code": 59172,
+      "src": "entypo",
+      "from": 59172
+    },
+    {
+      "search": [
+        "arrow",
+        "down"
+      ],
+      "code": 59228,
+      "uid": "8704cd847a47b64265b8bb110c8b4d62",
+      "css": "down-open",
+      "orig_css": "down-open",
+      "orig_code": 59228,
+      "src": "entypo",
+      "from": 59228
+    },
+    {
+      "search": [
+        "arrow",
+        "left"
+      ],
+      "code": 59229,
+      "uid": "c311c48d79488965b0fab7f9cd12b6b5",
+      "css": "left-open",
+      "orig_css": "left-open",
+      "orig_code": 59229,
+      "src": "entypo",
+      "from": 59229
+    },
+    {
+      "search": [
+        "arrow",
+        "right"
+      ],
+      "code": 59230,
+      "uid": "749e7d90a9182938180f1d2d8c33584e",
+      "css": "right-open",
+      "orig_css": "right-open",
+      "orig_code": 59230,
+      "src": "entypo",
+      "from": 59230
+    },
+    {
+      "search": [
+        "arrow",
+        "up"
+      ],
+      "code": 59231,
+      "uid": "9c7ff134960bb5a82404e4aeaab366d9",
+      "css": "up-open",
+      "orig_css": "up-open",
+      "orig_code": 59231,
+      "src": "entypo",
+      "from": 59231
+    },
+    {
+      "search": [
+        "arrow",
+        "down"
+      ],
+      "code": 59232,
+      "uid": "f11c9e95ae5eaa84d193e8fa1d38c6f9",
+      "css": "down-open-mini",
+      "orig_css": "down-open-mini",
+      "orig_code": 59232,
+      "src": "entypo",
+      "from": 59232
+    },
+    {
+      "search": [
+        "arrow",
+        "left"
+      ],
+      "code": 59233,
+      "uid": "592717bd601645d61517d2a584d04127",
+      "css": "left-open-mini",
+      "orig_css": "left-open-mini",
+      "orig_code": 59233,
+      "src": "entypo",
+      "from": 59233
+    },
+    {
+      "search": [
+        "arrow",
+        "right"
+      ],
+      "code": 59234,
+      "uid": "37f6cfbb4062ed0d01b351ec35c334ff",
+      "css": "right-open-mini",
+      "orig_css": "right-open-mini",
+      "orig_code": 59234,
+      "src": "entypo",
+      "from": 59234
+    },
+    {
+      "search": [
+        "arrow",
+        "up"
+      ],
+      "code": 59235,
+      "uid": "9e251fb8e9e1c71ab09683468e0479a3",
+      "css": "up-open-mini",
+      "orig_css": "up-open-mini",
+      "orig_code": 59235,
+      "src": "entypo",
+      "from": 59235
+    },
+    {
+      "search": [
+        "arrow",
+        "down"
+      ],
+      "code": 59236,
+      "uid": "289b5f92f23acf1059c93fbf401c1ad5",
+      "css": "down-open-big",
+      "orig_css": "down-open-big",
+      "orig_code": 59236,
+      "src": "entypo",
+      "from": 59236
+    },
+    {
+      "search": [
+        "arrow",
+        "left"
+      ],
+      "code": 59237,
+      "uid": "884cfc3e6e2d456dd2a2ca0dbb9e6337",
+      "css": "left-open-big",
+      "orig_css": "left-open-big",
+      "orig_code": 59237,
+      "src": "entypo",
+      "from": 59237
+    },
+    {
+      "search": [
+        "arrow",
+        "right"
+      ],
+      "code": 59238,
+      "uid": "004882ab2d5c418c5b2060e80596279b",
+      "css": "right-open-big",
+      "orig_css": "right-open-big",
+      "orig_code": 59238,
+      "src": "entypo",
+      "from": 59238
+    },
+    {
+      "search": [
+        "arrow",
+        "up"
+      ],
+      "code": 59239,
+      "uid": "0805cca616b3c12714f35af4d0912c10",
+      "css": "up-open-big",
+      "orig_css": "up-open-big",
+      "orig_code": 59239,
+      "src": "entypo",
+      "from": 59239
+    },
+    {
+      "search": [
+        "top",
+        "trophy"
+      ],
+      "code": 127942,
+      "uid": "978aa8facd816df874039e139cb0cdde",
+      "css": "trophy",
+      "orig_css": "trophy",
+      "orig_code": 127942,
+      "src": "entypo",
+      "from": 127942
+    },
+    {
+      "search": [
+        "profile",
+        "contact",
+        "user"
+      ],
+      "code": 128100,
+      "uid": "bbd66ef66bb8fa9edde54d9a90b89150",
+      "css": "user",
+      "orig_css": "user",
+      "orig_code": 128100,
+      "src": "entypo",
+      "from": 128100
+    },
+    {
+      "search": [
+        "cd",
+        "vinyl"
+      ],
+      "code": 128191,
+      "uid": "16f88519423df34fc5c48be7ded81b8f",
+      "css": "cd",
+      "orig_css": "cd",
+      "orig_code": 128191,
+      "src": "entypo",
+      "from": 128191
+    },
+    {
+      "search": [
+        "search",
+        "find"
+      ],
+      "code": 128269,
+      "uid": "7222571caa5c15f83dcfd447c58d68d9",
+      "css": "search",
+      "orig_css": "search",
+      "orig_code": 128269,
+      "src": "entypo",
+      "from": 128269
+    },
+    {
+      "search": [
+        "lock"
+      ],
+      "code": 128274,
+      "uid": "1a7104205ea96e6f40ac716d0ca72f21",
+      "css": "lock",
+      "orig_css": "lock",
+      "orig_code": 128274,
+      "src": "entypo",
+      "from": 128274
+    },
+    {
+      "search": [
+        "bookmark"
+      ],
+      "code": 128278,
+      "uid": "23912d5623126e14b7b137c3ba557168",
+      "css": "bookmark",
+      "orig_css": "bookmark",
+      "orig_code": 128278,
+      "src": "entypo",
+      "from": 128278
+    }
+  ]
+}

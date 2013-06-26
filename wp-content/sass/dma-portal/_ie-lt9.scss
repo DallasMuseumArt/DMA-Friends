@@ -1,0 +1,40 @@
+body.ie-lt9.overlay {
+	background: #A29690;
+	.nav-left, .nav-right {
+		background: #A29690;
+	}
+}
+
+.ie-lt9 {
+	#overlay {
+		background: transparent url(images/brown-bg.png);
+		right: auto;
+		height: 100%;
+	}
+	input[type="checkbox"] {
+		display: inline-block;
+		+ label:before {
+			display: none;
+		}
+	}
+	.badge .limited.limited {
+		/* IE8+ - must be on one line, unfortunately */
+		-ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.7071067811865483, M12=0.7071067811865467, M21=-0.7071067811865467, M22=0.7071067811865483, SizingMethod='auto expand')";
+		/* IE6 and 7 */
+		filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.7071067811865483, M12=0.7071067811865467, M21=-0.7071067811865467, M22=0.7071067811865483, SizingMethod='auto expand');
+		margin-left: 15px;
+		margin-top: -64px;
+	}
+	// .filter-buttons-wrap {
+	// 	li.last {
+	// 		padding: 0;
+	// 		float: left;
+	// 		margin-right: 0;
+	// 	}
+	// 	.help > span {
+	// 		display: block;
+	// 		width: 120px;
+	// 	}
+	// }
+
+}

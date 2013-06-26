@@ -1,0 +1,62 @@
+<?php
+/**
+* Plugin Name: BadgeOS DMA Print
+* Plugin URI: http://WebDevStudios.com
+* Description: Custom class for DMA printing
+* Version: 1.0
+* Author: WebDevStudios
+* Author URI: http://WebDevStudios.com
+*/
+
+// Hook our ID printer to the custom user registration
+// Note: $username is our DMA Friends ID (e.g. FR00000000)
+add_action( 'dma_user_registration', 'dma_print_user_id', 10, 5 );
+
+function dma_print_user_id( $user_id, $username, $first_name, $last_name, $location_printer_ip ) {
+	
+	require_once( 'poc/dmaprint.class.php' );
+	$idcard = new dmaprintid( $first_name . ' ' . $last_name, $username, $location_printer_ip );
+	$idcard->doPrint();
+	
+}
+// create custom plugin settings menu
+add_action( 'admin_menu', 'badgestack_dma_print_menu', 99 );
+
+function badgestack_dma_print_menu() {
+	
+	add_submenu_page( 'badgestack_badgestack', 'Print', 'Print', 'manage_options', 'badgestack_print_help', 'badgestack_dma_test_print' );
+	
+}
+
+
+add_action( 'admin_init', 'badgeos_dma_test_print' );
+
+function badgeos_dma_test_print() {
+	
+	if ( isset( $_POST['test_print'] ) ) {
+		dma_print_user_id( 1, $_POST['name'], $_POST['number'], 'John', 'Doe', $_POST['printer'] );
+	}
+	
+}
+
+function badgestack_dma_test_print() {
+	?>
+	<h2>Test ID Card Printing</h2>
+	<form method="post">
+		<input type="hidden" name="printtype" value="idcard" />
+
+		<label for="name">User Name</label>
+		<input type="text" name="name"></input><br/>
+
+		<label for="number">User ID Number</label>
+		<input type="text" name="number"></input><br/>
+
+		<label for="printer">Printer</label>
+		<input type="text" name="printer" value="192.168.91.89" /><br/>
+
+		<input type="submit" name="test_print" value="Print Test ID Card" />
+	</form>
+
+	<?php
+	
+}
