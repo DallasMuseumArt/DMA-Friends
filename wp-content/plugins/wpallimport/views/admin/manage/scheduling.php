@@ -10,7 +10,7 @@
 
 <p><i>Example:</i></p>
 
-<p>wget "<?php echo home_url() . '?import_key=' . $cron_job_key . '&import_id=' . $id . '&action=trigger'; ?>"</p>
+<p>wget -q -O /dev/null "<?php echo home_url() . '?import_key=' . $cron_job_key . '&import_id=' . $id . '&action=trigger'; ?>"</p>
  
 <p><strong>Execution Script</strong></p>
 
@@ -18,4 +18,4 @@
 
 <p><i>Example:</i></p>
 
-<p>wget "<?php echo home_url() . '?import_key=' . $cron_job_key . '&import_id=' . $id . '&action=processing'; ?>"</p>
+<p>wget -q -O /dev/null "<?php echo home_url() . '?import_key=' . $cron_job_key . '&import_id=' . $id . '&action=processing'; ?>"</p>

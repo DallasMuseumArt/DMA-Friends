@@ -65,7 +65,7 @@ add_action( 'genesis_loop', 'dma_user_dashboard' );
 function dma_user_dashboard() {
 
 	// If we're not logged in, we should display the registration/login screen
-	if ( !is_user_logged_in() ) {	?>
+	if ( ! is_user_logged_in() ) {	?>
 
 		<?php
 		dma_login_form();
@@ -98,7 +98,8 @@ function dma_user_dashboard() {
 				<?php echo dma_code_input_form(); ?>
 				<div class="dma-tips">
 					<h1>Helpful Tips</h1>
-					<p>As you enter Activity codes you’ll earn points, and you can use points to claim rewards. Head to the <a href="<?php echo site_url( '/get-rewards/' ); ?>">Rewards tab</a> to explore what’s available.</p>
+					<?php dma_user_notices(); ?>
+					<!-- <p>As you enter Activity codes you’ll earn points, and you can use points to claim rewards. Head to the <a href="<?php echo site_url( '/get-rewards/' ); ?>">Rewards tab</a> to explore what’s available.</p> -->
 				</div>
 			</div>
 			<div class="dma-dashboard-right latest-badge">
@@ -125,30 +126,42 @@ function dma_user_dashboard() {
 
 				</ul>
 				<?php
-					$dma_badges = get_posts( array(
-						'post_type'      => 'badge',
-						'posts_per_page' => -1
-					));
+					// Attempt to retrieve cached badge query
+					$dma_badges = maybe_unserialize( get_transient( 'dma_badges' ) );
+
+					// If we don't have a cached query, run a new one
+					if ( empty( $dma_badges ) ) {
+						$dma_badges = get_posts( array(
+							'post_type'      => 'badge',
+							'posts_per_page' => -1
+						) );
+
+						// Store our badge query for a week
+						set_transient( 'dma_badges', $dma_badges, WEEK_IN_SECONDS );
+					}
+
+					// Double-check we're working with an array...
+					// maybe_unserialize() wasn't working on dev
+					if ( ! is_array( $dma_badges ) )
+						$dma_badges = unserialize( $dma_badges );
 
 					$badge_output = '';
 					$badge_output .= '<div class="badge-list">';
 					foreach ( $dma_badges as $dma_badge ) {
-
-						// Make sure we can display this badge...
+						// Bail here if we cannot display this badge to the current user
 						if (
-							'steps' != dma_badge_trigger_type( $dma_badge->ID )                        // If it's not a step-based badge
-							|| 'hidden' == get_post_meta( $dma_badge->ID, '_dma_hidden', true )        // Or it's a hidden badge
+							'triggers' !== get_post_meta( $dma_badge->ID, '_badgeos_earned_by', true ) // If it's not a step-based badge
+							|| 'hidden' == get_post_meta( $dma_badge->ID, '_badgeos_hidden', true )    // Or it's a hidden badge
 							|| dma_is_outside_date_restrictions( $dma_badge->ID )                      // Or we're outside the date restrictions
-							|| dma_user_has_exceeded_max_earnings( dma_get_user_id(), $dma_badge->ID ) // Or the user has earned it the max times
+							|| badgeos_achievement_user_exceeded_max_earnings( dma_get_user_id(), $dma_badge->ID ) // Or the user has earned it the max times
 							|| ! dma_user_has_prereq_badges( dma_get_user_id(), $dma_badge->ID )       // Or we do NOT have the prereq badges
 						)
 							continue;
 
-						// Otherwise, create a new badge object and concatenate our output
+						// Create a new badge object and concatenate our output
 						$badge = new DMA_Badge( $dma_badge );
 						$badge_output .= $badge->details_output();
 						$badge_output .= $badge->details_modal();
-
 					} // End foreach
 					$badge_output .= '</div><!-- .badge-list -->';
 					echo $badge_output;
@@ -264,6 +277,50 @@ function dma_authenticaion_failure_message() {
 		echo '<a class="button secondary left close-popup" href="#">Close</a>';
 		echo '</div>';
 	}
+}
+
+add_filter( 'dma_user_notices', 'dma_carousel_user_notices', 10, 2 );
+/**
+ * Get all user notices and display in a carousel
+ */
+function dma_carousel_user_notices( $output, $notices ) {
+
+	if ( !function_exists( 'wds_caroufredsel' ) )
+		return 'nope'.$output;
+
+	wds_caroufredsel('.dma-tips-list', array(
+		'width' => 600,
+		'items' => 1,
+		'scroll' => 1,
+		'scroll' => array(
+			'fx' => 'crossfade'
+		),
+		'auto' => array(
+			'easing' => 'linear',
+			'duration' => 1000,
+			'timeoutDuration' => 9000,
+			'pauseOnHover' => true
+		),
+		'pagination' => array(
+			'container' => '.tips-list-nav',
+			'anchorBuilder' => 'function( nr ) {
+				return \'<a href="#">Test</a>\';
+			}'
+		),
+
+	) );
+	$output = '<div class="dma-tips-list-wrap">' . "\n";
+	$output = '<ul class="dma-tips-list">' . "\n";
+	foreach ( $notices as $notice ) {
+
+		$output .= '<li class="user-notice">'. apply_filters( 'the_content', $notice->post_content ) .'</li>' . "\n";
+	}
+	$output .= '</ul><!-- .dma-tips-list -->' . "\n";
+	$output .= '<div class="tips-list-nav"></div>' . "\n";
+	$output .= '</div><!-- .dma-tips-list-wrap -->' . "\n";
+	$output .= '<div class="clear"></div>' . "\n";
+
+	return $output;
 }
 
 genesis();

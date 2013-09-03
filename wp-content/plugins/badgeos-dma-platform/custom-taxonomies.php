@@ -13,11 +13,11 @@ class DMA_Tax_Setup {
 
 	public $taxonomy;
 
-	function DMA_Tax_Setup( $singular, $plural = '', $object_types = array( 'checkin', 'dma-step', 'activity' ), $args = array() ) {
+	function DMA_Tax_Setup( $singular, $plural = '', $object_types = array( 'checkin', 'step', 'activity' ), $args = array() ) {
 		DMA_Tax_Setup::__construct( $singular, $plural, $object_types, $args );
 	}
 
-	public function __construct( $singular, $plural = '', $object_types = array( 'checkin', 'dma-step', 'activity' ), $args = array() ) {
+	public function __construct( $singular, $plural = '', $object_types = array( 'checkin', 'step', 'activity' ), $args = array() ) {
 
 		if( ! $singular )
 			wp_die( 'No taxonomy ID given' );
@@ -148,17 +148,17 @@ class DMA_Tax_Setup {
 
 		global $submenu;
 
-		if ( empty( $submenu['badgestack_badgestack']) )
+		if ( empty( $submenu['badgeos_badgeos']) )
 			return;
 
-		$rest_of_the_array = array_slice( $submenu['badgestack_badgestack'], 5 );
+		$rest_of_the_array = array_slice( $submenu['badgeos_badgeos'], 5 );
 
-		$submenu['badgestack_badgestack'] = array_slice( $submenu['badgestack_badgestack'], 0, 5 );
+		$submenu['badgeos_badgeos'] = array_slice( $submenu['badgeos_badgeos'], 0, 5 );
 
-		$submenu['badgestack_badgestack'][] = array( $args['menu_title'], $args['capability'], $args['menu_slug'], $args['page_title'] );
+		$submenu['badgeos_badgeos'][] = array( $args['menu_title'], $args['capability'], $args['menu_slug'], $args['page_title'] );
 
 		foreach ( $rest_of_the_array as $piece )
-			array_push( $submenu['badgestack_badgestack'], $piece );
+			array_push( $submenu['badgeos_badgeos'], $piece );
 	}
 
 }
@@ -167,64 +167,8 @@ class DMA_Tax_Setup {
  * Register our custom taxonomies using the helper class
  */
 $badge_category        = new DMA_Tax_Setup( 'Badge Category', 'Badge Categories', array( 'badge' ) );
-$activity_type         = new DMA_Tax_Setup( 'Activity Type', 'Activity Type', array( 'checkin', 'activity', 'dma-step' ) );
-$activity_category     = new DMA_Tax_Setup( 'Activity Category', 'Activity Categories', array( 'checkin', 'activity', 'dma-step' ) );
-$activity_trigger_type = new DMA_Tax_Setup( 'Activity Trigger Type', 'Activity Trigger Types', array( 'checkin', 'activity', 'dma-step', 'dma-event' ) );
-$event_type            = new DMA_Tax_Setup( 'Event Type', 'Event Types', array( 'dma-event', 'checkin' ) );
-$event_category        = new DMA_Tax_Setup( 'Event Category', 'Event Categories', array( 'dma-event', 'checkin' ) );
-
-
-/**
- * Register aditional taxonomies
- */
-add_action( 'init', 'dma_register_other_taxonomies' );
-function dma_register_other_taxonomies() {
-
-	register_taxonomy(
-		'special-step-earning-option',
-		array( 'dma-step' ),
-		array(
-			'hierarchical' => false,
-			'labels'       => array(
-				'name'              => _x( 'Special Earning Options', 'taxonomy general name' ),
-				'singular_name'     => _x( 'Special Earning Option', 'taxonomy singular name' ),
-				'search_items'      => __( 'Search Special Earning Options' ),
-				'all_items'         => __( 'All Special Earning Options' ),
-				'parent_item'       => __( 'Parent Special Earning Options' ),
-				'parent_item_colon' => __( 'Parent Special Earning Option:' ),
-				'edit_item'         => __( 'Edit Special Earning Option' ),
-				'update_item'       => __( 'Update Special Earning Option' ),
-				'add_new_item'      => __( 'Add New Special Earning Option' ),
-				'new_item_name'     => __( 'New Special Earning Option Name' ),
-				'menu_name'         => __( 'Special Earning Options' ),
-			),
-			'show_ui'      => true,
-			'query_var'    => true,
-			'rewrite'      => false,
-		)
-	);
-
-	register_taxonomy(
-		'step-measurement',
-		array( 'dma-step' ),
-		array(
-			'hierarchical' => false,
-			'labels'       => array(
-				'name'              => _x( 'Step Measurement', 'taxonomy general name' ),
-				'singular_name'     => _x( 'Step Measurement', 'taxonomy singular name' ),
-				'search_items'      => __( 'Search Step Measurements' ),
-				'all_items'         => __( 'All Step Measurements' ),
-				'parent_item'       => __( 'Parent Step Measurements' ),
-				'parent_item_colon' => __( 'Parent Step Measurement:' ),
-				'edit_item'         => __( 'Edit Step Measurement' ),
-				'update_item'       => __( 'Update Step Measurement' ),
-				'add_new_item'      => __( 'Add New Step Measurement' ),
-				'new_item_name'     => __( 'New Step Measurement Name' ),
-				'menu_name'         => __( 'Step Measurements' ),
-			),
-			'show_ui'      => false,
-			'query_var'    => true,
-			'rewrite'      => false,
-		)
-	);
-}
+$activity_type         = new DMA_Tax_Setup( 'Activity Type', 'Activity Type', array( 'activity', 'step' ) );
+$activity_category     = new DMA_Tax_Setup( 'Activity Category', 'Activity Categories', array( 'activity', 'step' ) );
+$activity_trigger_type = new DMA_Tax_Setup( 'Activity Trigger Type', 'Activity Trigger Types', array( 'activity', 'step' ) );
+$event_type            = new DMA_Tax_Setup( 'Event Type', 'Event Types', array( 'dma-event', 'step' ) );
+$event_category        = new DMA_Tax_Setup( 'Event Category', 'Event Categories', array( 'dma-event', 'step' ) );

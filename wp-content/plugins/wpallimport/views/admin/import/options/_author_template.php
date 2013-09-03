@@ -8,10 +8,12 @@
 </tr>		
 <tr>
 	<td colspan="3">
+		<?php if ($entry != 'page'):?>
 		<h3><?php _e('Post Excerpt', 'pmxi_plugin') ?></h3>
 		<div>
 			<input type="text" name="post_excerpt" style="width:100%;" value="<?php echo esc_attr($post['post_excerpt']) ?>" />
 		</div>
+		<?php endif; ?>
 		<h3><?php _e('Post Slug', 'pmxi_plugin') ?></h3>
 		<div>
 			<input type="text" name="post_slug" style="width:100%;" value="<?php echo esc_attr($post['post_slug']) ?>" />

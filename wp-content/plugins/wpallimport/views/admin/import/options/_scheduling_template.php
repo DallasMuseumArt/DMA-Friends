@@ -2,7 +2,7 @@
 	<tr>
 		<td colspan="3">
 			<fieldset class="optionsset">
-				<legend>Scheduling</legend>
+				<legend><?php _e('Scheduling','pmxi_plugin');?></legend>
 				<div class="input">
 					<input type="hidden" name="is_scheduled" value="0" />
 					<input type="checkbox" id="is_scheduled_<?php echo $entry; ?>" class="switcher" name="is_scheduled" value="1" <?php echo $scheduled['is_scheduled'] ? 'checked="checked"': '' ?>/>
@@ -29,7 +29,7 @@
 					<br /><br />
 
 					<p>
-						<b>This import can be also be scheduled using cron jobs.</b> Save the import, visit the <i>Manage Imports</i> page, and click the <i>Cron Scheduling</i> link to set up cron scheduling. Using WordPress scheduling logic is not recommended for large files.
+						<?php _e('<b>This import can be also be scheduled using cron jobs.</b> Save the import, visit the <i>Manage Imports</i> page, and click the <i>Cron Scheduling</i> link to set up cron scheduling. Using WordPress scheduling logic is not recommended for large files.','pmxi_plugin');?>
 					</p>
 
 				</div>

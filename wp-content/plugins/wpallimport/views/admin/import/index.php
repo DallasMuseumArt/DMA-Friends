@@ -49,6 +49,23 @@ $l10n = array(
 	        <form method="post" class="choose-file no-enter-submit" enctype="multipart/form-data" autocomplete="off">
 				<input type="hidden" name="is_submitted" value="1" />
 				<?php wp_nonce_field('upload-xml', '_wpnonce_upload-xml') ?>
+				<?php if (!empty($detection_feed_extension)):?>
+				<div class="file-type-container">
+					<h3>
+						<input type="radio" id="type_ftp" name="type" value="url" <?php echo ('url' == $post['type'] and $detection_feed_extension) ? 'checked="checked"' : '' ?> />
+						<label for="type_ftp"><?php _e('Select feed extension manually', 'pmxi_plugin'); ?></label>
+					</h3>
+					<div class="file-type-options">
+						<input type="text" class="regular-text" name="url" value="<?php echo esc_attr($post['url']) ?>" />
+						<select name="feed_type">
+							<option value="xml" <?php echo ('xml' == $post['feed_type']) ? 'checked="checked"' : ''; ?>>XML</option>
+							<option value="csv" <?php echo ('csv' == $post['feed_type']) ? 'checked="checked"' : ''; ?>>CSV</option>
+							<option value="zip" <?php echo ('zip' == $post['feed_type']) ? 'checked="checked"' : ''; ?>>ZIP</option>
+							<option value="gz" <?php echo ('gz' == $post['feed_type']) ? 'checked="checked"' : ''; ?>>GZ</option>
+						</select>
+					</div>
+				</div>
+				<?php else:?>
 				<div class="file-type-container">
 					<h3>
 						<input type="radio" id="type_upload" name="type" value="upload" <?php echo 'upload' == $post['type'] ? 'checked="checked"' : '' ?> />
@@ -109,6 +126,7 @@ $l10n = array(
 					</div>
 				</div>
 				<div id="url_upload_status"></div>
+				<?php endif; ?>				
 				<p class="submit-buttons">
 					<input type="hidden" name="is_submitted" value="1" />
 					<?php wp_nonce_field('choose-file', '_wpnonce_choose-file') ?>

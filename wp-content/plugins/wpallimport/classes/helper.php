@@ -36,7 +36,7 @@ class PMXI_Helper {
 		$split = explode('/', str_replace('\\', '/', $pattern));
 		$mask = array_pop($split);
 		$path = implode('/', $split);
-		
+
 		if (($dir = @opendir($path)) !== false or ($dir = @opendir($path . '/')) !== false) {
 			$glob = array();
 			while(($file = readdir($dir)) !== false) {

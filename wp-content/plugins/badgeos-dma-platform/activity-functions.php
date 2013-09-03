@@ -1,201 +1,6 @@
 <?php
 
 /**
- * Retrieve steps (optionally only steps that have the specified related activity).
- *
- * @since  1.0
- * @param  int     $activity_id         [description]
- * @param  array   $fitness_type_terms  [description]
- * @param  array   $activity_type_terms [description]
- * @return [type]                       [description]
- */
-function dma_get_steps( $activity_id = 0, $fitness_type_terms = array(), $activity_type_terms = array() ) {
-	global $wpdb;
-
-	// Create an empty array we will push posts onto in
-	// the following three separate get_post calls
-	$steps = array();
-
-	// set up the basic query arguments for the get steps call
-	$args = array(
-		'post_type'				=> 'dma-step',
-		'posts_per_page'		=> - 1,
-		'suppress_filters'		=> false,
-		'connected_direction'	=> 'from',
-		'connected_type'		=> 'activity-to-step',
-	);
-
-	// If we're looking for a step that requires a specific activity
-	// to be performed
-	if ( $activity_id ) {
-		// set up the flag for the P2P relationship
-		$args['connected_items'] = $activity_id;
-		// push any found onto the $steps array
-		foreach ( get_posts( $args ) as $post )
-			array_push( $steps, $post );
-	}
-
-	// Reset flag for the rest of the queries below, as they will
-	// require an 'any' relation as far as P2P relationships go.
-	unset( $args['connected_direction'] );
-	unset( $args['connected_type'] );
-	unset( $args['connected_items'] );
-
-	// If we're looking for steps that require a specific fitness type term
-	if ( ! empty( $fitness_type_terms ) ) {
-		// For each of the fitness type terms required
-		foreach ( $fitness_type_terms as $term ) {
-			// There should be only one fitness type term required for any
-			// step, so we'll set the tax query in the get_posts argument
-			// in the 0 element
-			$args['tax_query'][0] = array(
-				'taxonomy'	=> 'fitness-type',
-				'field'		=> 'slug',
-				'terms'		=> $term->slug,
-			);
-			// Push any found posts onto the $steps array
-			foreach ( get_posts( $args ) as $post )
-				array_push( $steps, $post );
-		}
-	}
-
-	// If we're looking for steps that require a specific activity type term
-	if ( ! empty( $activity_type_terms ) ) {
-		foreach ( $activity_type_terms as $term ) {
-			// There should be only one activity type term required for any
-			// step, so we'll set the tax query in the get_posts argument
-			// in the 0 element
-			$args['tax_query'][0] = array(
-				'taxonomy'	=> 'activity-type',
-				'field'		=> 'slug',
-				'terms'		=> $term->slug,
-			);
-			// Push any found posts onto the $steps array
-			foreach ( get_posts( $args ) as $post )
-				array_push( $steps, $post );
-		}
-	}
-
-	// Get steps that require any activity
-	$args['tax_query'][0] = array(
-		'taxonomy' => 'special-step-earning-option',
-		'field' => 'slug',
-		'terms' => 'any-activity',
-	);
-	foreach ( get_posts( $args ) as $post )
-		array_push( $steps, $post );
-
-	// Get steps that require repeat activity
-	$args['tax_query'][0] = array(
-		'taxonomy' => 'special-step-earning-option',
-		'field' => 'slug',
-		'terms' => 'repeat',
-	);
-
-	foreach ( get_posts( $args ) as $post )
-		array_push( $steps, $post );
-
-	// @TODO maybe move this into the badgestack_get_required_children_of_achievement. would require adding filters there
-	return $steps;
-}
-
-/**
- * Create a new DMA checkin.
- *
- * Attaches taxonomy data associated with the related activity to the DMA card.
- * Relates the DMA card to the location the member is reporting for.
- * Relates the activity to the DMA Card via P2P.
- *
- * @since  1.0
- * @param  int      $user_id      The given user's ID
- * @param  int      $activity_id  The activity's post ID
- * @param  int      $date         The date to use for logging the activity
- * @param  int      $location_id  The location where this activity was logged
- * @param  int      $accession_id The accession ID provided by the user during checkin
- * @param  bool     $is_admin     True if we're submitting from an admin form, false otherwise
- * @return int|bool               The successfully created checkin's post ID, or false on failure
- */
-function dma_create_checkin( $user_id = 0, $activity_id = 0, $date = NULL, $location_id = 0, $accession_id = 0, $is_admin = false ) {
-	global $wpdb;
-
-	// If no user ID, get our current user
-	if ( ! $user_id )
-		$user_id = wp_get_current_user()->ID;
-
-	// Grab our user data
-	$user_data = get_userdata( $user_id );
-
-	// Grab the current date if no date specified
-	if ( ! $date )
-		$date = current_time( 'mysql' );
-
-	// Grab our current location ID if none specified
-	if ( ! $location_id )
-		$location_id = dma_get_current_location_id();
-
-	// Assume no checkin gets created
-	$checkin_id = false;
-
-	// Nicely formatted date for post title
-	$str_time = strtotime( $date );
-	$nice_date = ' at ' . mysql2date( 'g:ia', $str_time );
-	$nice_date .= ' on ' . mysql2date( 'n/j/Y', $str_time );
-
-	// Grab the activity post
-	$activity = get_post( $activity_id );
-
-	// If the activity has a time lockout, and the user is locked out, prevent checkin
-	if ( ! $is_admin && dma_is_activity_locked_for_user( $user_id, $activity_id ) )
-		return false;
-
-	// If the activity has any time-based restrictions, make sure we're not outside of those
-	if ( ! $is_admin && dma_is_checkin_outside_time_restrictions( $activity_id ) )
-		return false;
-
-	// Setup our post data to create the new DMA card
-	$new_post = array(
-		'post_type'		=> 'checkin',
-		'post_status'	=> 'publish',
-		'post_author'	=> $user_id,
-		'post_title'	=> "{$user_data->user_nicename} just completed 1 check-in of {$activity->post_title} {$nice_date}.",
-		'post_date'		=> $date,
-	);
-
-	// Create a new post for our check-in
-	$checkin_id = wp_insert_post( $new_post );
-
-	// If we're logging an activity...
-	// NOTE: We're using $wpdb->insert() because p2p_type() isn't available
-	// to us during user authentication (e.g. for dma_award_activities_on_login())
-	if ( 'activity' == get_post_type( $activity_id ) ) {
-
-		// Create P2P connection from the activity to the checkin
-		// p2p_type( 'activity-to-checkin' )->connect( $activity_id, $checkin_id );
-		$wpdb->insert( $wpdb->p2p, array( 'p2p_type' => 'activity-to-checkin', 'p2p_from' => $activity_id, 'p2p_to' => $checkin_id ), array( '%s', '%d', '%d' ) );
-
-	// Or, if we're logging an event...
-	} elseif ( 'dma-event' == get_post_type( $activity_id ) ) {
-
-		// Create P2P connection from the activity to the checkin
-		// p2p_type( 'dma-event-to-checkin' )->connect( $activity_id, $checkin_id );
-		$wpdb->insert( $wpdb->p2p, array( 'p2p_type' => 'dma-event-to-checkin', 'p2p_from' => $activity_id, 'p2p_to' => $checkin_id ), array( '%s', '%d', '%d' ) );
-	}
-
-	// Set the current location term for the checkin
-	wp_set_object_terms( $checkin_id, $location_id, 'location', true );
-
-	// Check if user deserves any steps based on this checkin
-	find_relevant_steps_and_maybe_award( $user_id, $activity_id, $activity_type_terms, $activity_category_terms );
-
-	// Add a hook so we can do other things too
-	do_action( 'dma_create_checkin', $checkin_id, $user_id, $activity_id, $date, $location_id, $accession_id, $is_admin );
-	do_action( 'dma_award_user_points', $user_id, $activity_id );
-
-	// Return our final DMA card ID
-	return $checkin_id;
-}
-
-/**
  * Get an activity's post ID from a given Accession ID
  *
  * @param  integer $accession_id The provided accession ID
@@ -263,7 +68,7 @@ function dma_activity_submit( $user_id = 0, $activity_id = 0, $accession_id = 0,
 function dma_is_activity_locked_for_user( $user_id, $activity_id = 0 ) {
 
 	// If the activity has a lockout, see if a user should be prevented from checkin
-	if ( $lockout_limit = get_post_meta( $activity_id, '_dma_activity_lockout', true ) ) {
+	if ( $lockout_limit = get_post_meta( $activity_id, '_badgeos_activity_lockout', true ) ) {
 
 		// Set a timestamp for the current time minus lockout (in minutes)
 		$since = date( 'Y-m-d H:i:s', time() - ( absint( $lockout_limit ) * 60 ) );
@@ -299,67 +104,6 @@ function dma_is_activity_locked_for_user( $user_id, $activity_id = 0 ) {
 
 }
 
-/**
- * Conditional to test if activity is being logged outside the time limitations
- *
- * @since  1.0
- * @param  integer $activity_id The given activity's post ID
- * @return bool                 True if we're before or after the date limits, false if we're okay to proceed
- */
-function dma_is_checkin_outside_time_restrictions( $activity_id = 0 ) {
-
-	// Lets see if we have any time restrictions at all...
-	if ( $time_restriction = get_post_meta( $activity_id, '_dma_time_restriction', true ) ) {
-
-		// Don't forget about our time offset...
-		$offset = time() + ( get_option('gmt_offset') * 3600 );
-
-		// If the restrictions are day/time based...
-		if ( 'hours' == $time_restriction ) {
-
-			// Setup our time vars
-			$today        = date('l', $offset );
-			$current_time = strtotime( date('G:i:s', $offset ) );
-			$allowed_days = get_post_meta( $activity_id, '_dma_time_restriction_days', false );
-			$start_time   = strtotime( date( 'G:i:s', strtotime( get_post_meta( $activity_id, '_dma_time_restriction_hour_begin', true ) ) ) );
-			$end_time     = strtotime( date( 'G:i:s', strtotime( get_post_meta( $activity_id, '_dma_time_restriction_hour_end', true ) ) ) );
-
-			// if we're not on one of the allowed days
-			if ( is_array( $allowed_days ) && ! in_array( $today, $allowed_days ) )
-				return true;
-
-			// or we're before the start hour
-			if ( $current_time < $start_time )
-				return true;
-
-			// or we're after the end hour
-			if ( $current_time > $end_time )
-				return true;
-
-		// If our restrictions are based on a specific date range...
-		} else if ( 'dates' == $time_restriction ) {
-
-			// If this is an event, and we aren't limiting check-ins to their date range, the rest is irrelevant
-			$limit_dates = get_post_meta( $activity_id, '_dma_time_restriction_limit_checkin1', true );
-			if ( 'dma-event' == get_post_type( $activity_id ) && empty( $limit_dates ) )
-				return false;
-
-			$todays_date = strtotime( date( 'Y-m-d', $offset ) );
-
-			if ( $beginning_date = get_post_meta( $activity_id, '_dma_time_restriction_date_begin', true ) ) {
-				if ( $todays_date < $beginning_date )
-					return true;
-			}
-			if ( $end_date = get_post_meta( $activity_id, '_dma_time_restriction_date_end', true ) ) {
-				if ( $todays_date > $end_date )
-					return true;
-			}
-		}
-	}
-
-	// If we made it this far, we're clear to use the activity
-	return false;
-}
 
 /**
  * Generate our DMA event/activity code input form
@@ -407,7 +151,7 @@ function dma_code_ajax_handler() {
 	// If we have a valid ID, and we're not blocked in any way, submit the activity.
 	if ( $activity_id && ! $locked_out && ! $time_restricted ) {
 		$completed_checkin_id = dma_activity_submit( $user_id, $activity_id, $accession_id, $is_admin );
-		$earned_points = ( $points = get_post_meta( $activity_id, '_dma_points', true ) ) ? sprintf( __( 'You earned %d points!', 'dma'), $points ) : '';
+		$earned_points = ( $points = get_post_meta( $activity_id, '_badgeos_points', true ) ) ? sprintf( __( 'You earned %d points!', 'dma'), $points ) : '';
 	}
 
 	// If we earned any achievements...
@@ -417,7 +161,7 @@ function dma_code_ajax_handler() {
 		foreach ( $achievements as $achievement_id ) {
 			if ( 'badge' == get_post_type( $achievement_id ) ) {
 				$earned_badges[] = $achievement_id;
-				$badge_points_total += get_post_meta( $achievement_id, '_dma_points', true );
+				$badge_points_total += get_post_meta( $achievement_id, '_badgeos_points', true );
 			}
 		}
 
@@ -449,7 +193,7 @@ function dma_code_ajax_handler() {
 		$response['message'] = '<div class="check-in failure"><span>' . sprintf( __( 'We\'re sorry, you\'ve already checked in using "%s". Try another activity?', 'dma' ), $accession_id ) . '</span></div>';
 
 	// Grab our user's current points total
-	$response['points'] = get_user_meta( $user_id, '_dma_points', true );
+	$response['points'] = get_user_meta( $user_id, '_badgeos_points', true );
 
 	// Send back our data and bail
 	echo json_encode( $response );
@@ -499,25 +243,14 @@ function dma_txt_integration( $response = '', $phone_number = 0, $accession_id =
 	elseif ( $locked_out )
 		$response = "We're sorry, it seems you've already checked in using this Code.";
 	elseif ( $completed_checkin_id && 2344 == $activity_id )
-		$response = sprintf( "You've been awarded %d points.", get_post_meta( $activity_id, '_dma_points', true ) );
+		$response = sprintf( "You've been awarded %d points.", get_post_meta( $activity_id, '_badgeos_points', true ) );
 	elseif ( $completed_checkin_id )
-		$response = sprintf( "Thank you for checking in! You've been awarded %d points.", get_post_meta( $activity_id, '_dma_points', true ) );
+		$response = sprintf( "Thank you for checking in! You've been awarded %d points.", get_post_meta( $activity_id, '_badgeos_points', true ) );
 
 	// Return our response
 	return $response;
 }
 add_filter( 'badgeos_txt_notification', 'dma_txt_integration', 10, 3 );
-
-
-/**
- * Hook into our checkin process and add custom meta for "Liked a piece of art" posts
- * All params are fed by the "dma_create_checkin" hook.
- */
-function dma_associate_art_accession_id( $checkin_id, $user_id, $activity_id, $date, $location_id, $accession_id ) {
-	if ( 2344 == $activity_id )
-		update_post_meta( $checkin_id, '_dma_accession_id', $accession_id );
-}
-add_action( 'dma_create_checkin', 'dma_associate_art_accession_id', 10, 6 );
 
 /**
  * Get all activities connected to a given location
@@ -568,3 +301,15 @@ function dma_award_activities_on_login( $user_id ) {
 	}
 }
 add_action( 'user_authenticated', 'dma_award_activities_on_login' );
+
+/**
+ * Cache buster to delete a user's activity stream cache
+ *
+ * @since 2.0.0
+ * @param integer $checkin_id The completed checkin ID
+ * @param integer $user_id    The given user's ID
+ */
+function dma_activity_bust_cache(  $checkin_id = 0, $user_id = 0 ) {
+	delete_transient( 'dma_user_{$user_id}_activity_stream' );
+}
+add_action( 'dma_create_checkin', 'dma_activity_bust_cache', 10, 2 );

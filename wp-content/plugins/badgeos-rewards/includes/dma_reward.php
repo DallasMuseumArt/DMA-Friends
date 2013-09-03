@@ -14,7 +14,7 @@ if ( ! class_exists( 'DMA_Reward' ) ) {
  * @param  int $reward_id The ID of the reward in question
  * @param  int $user_id  	 The ID of the user in question
  */
-class DMA_Reward extends DMA_Base {
+class DMA_Reward {
 
 	public $user_id;
 	public $user_points;
@@ -33,7 +33,7 @@ class DMA_Reward extends DMA_Base {
 
 		// Setup user details
 		$this->user_id = dma_get_user_id( $user_id );
-		$this->user_points = dma_get_users_points( $this->user_id );
+		$this->user_points = badgeos_get_users_points( $this->user_id );
 		// Grab our user's bookmarks
 		$this->user_bookmarks = maybe_unserialize( get_user_meta( $this->user_id, '_dma_bookmarked_items', true ) );
 	}

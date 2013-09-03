@@ -1,384 +1,256 @@
 <?php
 /**
- * BadgeStack Admin Meta Boxes
+ * Admin Meta Boxes
  *
- * @package BadgeStack
+ * @package BadgeOS
+ * @subpackage Admin
+ * @author Credly, LLC
+ * @license http://www.gnu.org/licenses/agpl.txt GNU AGPL v3.0
+ * @link https://credly.com
  */
 
-add_action( 'admin_init', 'badgestack_register_meta_boxes' );
+/**
+ * Register custom meta boxes used throughout BadgeOS
+ *
+ * @since  1.0.0
+ * @param  array  $meta_boxes The existing metabox array we're filtering
+ * @return array              An updated array containing our new metaboxes
+ */
+function badgeos_custom_metaboxes( array $meta_boxes ) {
 
-function badgestack_register_meta_boxes() {
-	// Steps meta box attached to Badges
-	add_meta_box( 'badgestack_badge_type_meta_box', __( 'Badge Options', 'badgestack' ), 'badgestack_badge_type_meta_box', 'badge', 'side', 'low' );
+	// Start with an underscore to hide fields from custom fields list
+	$prefix = '_badgeos_';
 
-	// Steps metadata meta box attached to Steps
-	add_meta_box( 'badgestack_step_details', __( 'Step Details', 'badgestack' ), 'badgestack_step_details_meta_box', 'step', 'normal', 'core' );
-	
-	//Triggers meta box attached to all achievement types
-	add_meta_box( 'badgestack_triggers_meta_box' , __( 'Triggers', 'badgestack' ), 'badgestack_triggers_meta_box', 'step', 'normal', 'low' );
-	
-	//Submissions meta box to approve/deny submissions
-	add_meta_box( 'badgestack_submissions_meta_box', __( 'Submissions Moderation', 'badgestack' ), 'badgestack_submission_meta_box', 'submission', 'side', 'low' );
-	
-	//Nominations meta box to approve/deny submissions
-	add_meta_box( 'badgestack_nominations_meta_box', __( 'Nominations Moderation', 'badgestack' ), 'badgestack_submission_meta_box', 'nomination', 'side', 'low' );
-	
-	//Save meta box data
-	add_action( 'save_post', 'badgestack_save_meta_box_data' );
+	// Grab our achievement types as an array
+	$achievement_types = badgeos_get_achievement_types_slugs();
+
+	// Setup our $post_id, if available
+	$post_id = isset( $_GET['post'] ) ? $_GET['post'] : 0;
+
+	// New Achievement Types
+	$meta_boxes[] = array(
+		'id'         => 'achievement_type_data',
+		'title'      => __( 'Achievement Type Data', 'badgeos' ),
+		'pages'      => array( 'achievement-type' ), // Post type
+		'context'    => 'normal',
+		'priority'   => 'high',
+		'show_names' => true, // Show field names on the left
+		'fields'     => array(
+			array(
+				'name' => __( 'Plural Name', 'badgeos' ),
+				'desc' => __( 'The plural name for this achievement (Title is singular name).', 'badgeos' ),
+				'id'   => $prefix . 'plural_name',
+				'type' => 'text_medium',
+			),
+			array(
+				'name'    => __( 'Show in Menu?', 'badgeos' ),
+				'desc' 	 => ' '.__( 'Yes, show this achievement in the BadgeOS menu.', 'badgeos' ),
+				'id'      => $prefix . 'show_in_menu',
+				'type'	 => 'checkbox',
+			),
+			array(
+				'name' => __( 'Default Badge Image', 'badgeos' ),
+				'desc' => __( 'To set a default image, use the <strong>Featured Image</strong> metabox to the right.  For best results, use a square .png file with a transparent background, at least 200x200 pixels.', 'badgeos' ),
+				'id'   => $prefix . 'upload_badge_image_achievement',
+				'type' => 'text_only',
+			),
+		)
+	);
+
+	// Achievements
+	$meta_boxes[] = apply_filters( 'badgeos_achievement_data_meta_box', array(
+		'id'         => 'achievement_data',
+		'title'      => __( 'Achievement Data', 'badgeos' ),
+		'pages'      => $achievement_types, // Post type
+		'context'    => 'advanced',
+		'priority'   => 'high',
+		'show_names' => true, // Show field names on the left
+		'fields'     => apply_filters( 'badgeos_achievement_data_meta_box_fields', array(
+			array(
+				'name' => __( 'Upload Badge Image', 'badgeos' ),
+				'desc' => sprintf( __( '<p>To set an image use the <strong>Featured Image</strong> metabox to the right.  For best results, use a square .png file with a transparent background, at least 200x200 pixels.</p><p>If no image is specified, this achievement will default to the <a href="%s">Achievement Type\'s</a> featured image.</p>', 'badgeos' ), admin_url('edit.php?post_type=achievement-type') ),
+				'id'   => $prefix . 'upload_badge_image_achievement',
+				'type' => 'text_only',
+			),
+			array(
+				'name' => __( 'Points Awarded', 'badgeos' ),
+				'desc' => ' '.__( 'Points awarded for earning this achievement (optional).  Leave empty if no points are awarded.', 'badgeos' ),
+				'id'   => $prefix . 'points',
+				'type' => 'text_small',
+			),
+			array(
+				'name'    => __( 'Earned By:', 'badgeos' ),
+				'desc'    => __( 'How this achievement can be earned.', 'badgeos' ),
+				'id'      => $prefix . 'earned_by',
+				'type'    => 'select',
+				'options' => apply_filters( 'badgeos_achievement_earned_by', array(
+						array( 'name' => 'Completing Steps',           'value' => 'triggers' ),
+						array( 'name' => 'Minimum Number of Points',   'value' => 'points' ),
+						array( 'name' => 'Submission (Reviewed)',      'value' => 'submission' ),
+						array( 'name' => 'Submission (Auto-accepted)', 'value' => 'submission_auto' ),
+						array( 'name' => 'Nomination',                 'value' => 'nomination' ),
+						array( 'name' => 'Admin-awarded Only',         'value' => 'admin' ),
+					) )
+			),
+			array(
+				'name' => __( 'Minimum Points Requried', 'badgeos' ),
+				'desc' => ' '.__( 'Fewest number of points required for earning this achievement.', 'badgeos' ),
+				'id'   => $prefix . 'points_required',
+				'type' => 'text_small',
+			),
+			array(
+				'name' => __( 'Sequential Steps', 'badgeos' ),
+				'desc' => ' '.__( 'Yes, steps must be completed in order.', 'badgeos' ),
+				'id'   => $prefix . 'sequential',
+				'type' => 'checkbox',
+			),
+			array(
+				'name' => __( 'Show Earners', 'badgeos' ),
+				'desc' => ' '.__( 'Yes, display a list of users who have earned this achievement.', 'badgeos' ),
+				'id'   => $prefix . 'show_earners',
+				'type' => 'checkbox',
+			),
+			array(
+				'name' => __( 'Congratulations Text', 'badgeos' ),
+				'desc' => __( 'Displayed after achievement is earned. If sending to Credly, a great place for a testimonial for those who complete this achievement.', 'badgeos' ),
+				'id'   => $prefix . 'congratulations_text',
+				'type' => 'textarea',
+			),
+			array(
+				'name' => __( 'Maximum Earnings', 'badgeos' ),
+				'desc' => ' '.__( 'Number of times a user can earn this badge (default, if blank: infinite)', 'badgeos' ),
+				'id'   => $prefix . 'maximum_earnings',
+				'type' => 'text_small',
+			),
+			array(
+				'name'    => __( 'Hidden?', 'badgeos' ),
+				'desc'    => '',
+				'id'      => $prefix . 'hidden',
+				'type'    => 'select',
+				'options' => array(
+					array( 'name' => 'Show to User', 'value' => 'show', ),
+					array( 'name' => 'Hidden to User', 'value' => 'hidden', ),
+				),
+			),
+		), $prefix, $achievement_types )
+	), $achievement_types );
+
+	// Submissions
+	$meta_boxes[] = array(
+		'id'         => 'submission_data',
+		'title'      => __( 'Submission Status', 'badgeos' ),
+		'pages'      => array( 'submission' ), // Post types
+		'context'    => 'side',
+		'priority'   => 'default',
+		'show_names' => true, // Show field names on the left
+		'fields'     => array(
+			array(
+				'name' => __( 'Status', 'badgeos' ),
+				'desc' => __( 'Approve or Deny this entry.', 'badgeos' ),
+				'id'   => $prefix . 'submission_status',
+				'type' => 'select',
+				'options' => array(
+					array( 'name' => 'Pending Review', 'value' => 'pending', ),
+					array( 'name' => 'Approved', 'value' => 'approved', ),
+					array( 'name' => 'Denied', 'value' => 'denied', ),
+				),
+			),
+			array(
+				'name' => __( 'Achievement ID to Award', 'badgeos' ),
+				'desc' => '<a href="' . esc_url( admin_url('post.php?post=' . get_post_meta( $post_id, '_badgeos_submission_achievement_id', true ) . '&action=edit') ) . '">' . __( 'View Achievement', 'badgeos' ) . '</a>',
+				'id'   => $prefix . 'submission_achievement_id',
+				'type'	 => 'text_small',
+			),
+		)
+	);
+
+	// Nominations
+	$meta_boxes[] = array(
+		'id'         => 'nomination_data',
+		'title'      => __( 'Nomination Data', 'badgeos' ),
+		'pages'      => array( 'nomination' ), // Post types
+		'context'    => 'side',
+		'priority'   => 'default',
+		'show_names' => true, // Show field names on the left
+		'fields'     => array(
+			array(
+				'name' => __( 'Status', 'badgeos' ),
+				'desc' => __( 'Approve or Deny this entry.', 'badgeos' ),
+				'id'   => $prefix . 'nomination_status',
+				'type' => 'select',
+				'options' => array(
+					array( 'name' => 'Pending Review', 'value' => 'pending', ),
+					array( 'name' => 'Approved', 'value' => 'approved', ),
+					array( 'name' => 'Denied', 'value' => 'denied', ),
+				),
+			),
+			array(
+				'name' => __( 'Nominee', 'badgeos' ),
+				'id'   => $prefix . 'nomination_user_id',
+				'desc' => ( $post_id && get_post_type( $post_id ) == 'nomination' ) ? get_userdata( absint( get_post_meta( $post_id, '_badgeos_nomination_user_id', true ) ) )->display_name : '',
+				'type' => 'text_medium',
+			),
+			array(
+				'name' => __( 'Nominated By', 'badgeos' ),
+				'id'   => $prefix . 'nominating_user_id',
+				'desc' => ( $post_id && get_post_type( $post_id ) == 'nomination' ) ? get_userdata( absint( get_post_meta( $post_id, '_badgeos_nominating_user_id', true ) ) )->display_name : '',
+				'type' => 'text_medium',
+			),
+			array(
+				'name' => __( 'Achievement ID to Award', 'badgeos' ),
+				'desc' => '<a href="' . esc_url( admin_url('post.php?post=' . get_post_meta( $post_id, '_badgeos_nomination_achievement_id', true ) . '&action=edit') ) . '">' . __( 'View Achievement', 'badgeos' ) . '</a>',
+				'id'   => $prefix . 'nomination_achievement_id',
+				'type'	 => 'text_small',
+			),
+		)
+	);
+
+	return $meta_boxes;
 }
+add_filter( 'cmb_meta_boxes', 'badgeos_custom_metaboxes' );
 
-function badgestack_badge_type_meta_box( $post ) {
-	
-	//load metadata setting values
-	$badgestack_unlock_options = get_post_meta( absint( $post->ID ), '_badgestack_badge_unlock_options', true );
-	$badgestack_sequential = get_post_meta( absint( $post->ID ), '_badgestack_badge_sequential', true );
-	
-	$badgestack_point_value = get_post_meta( absint( $post->ID ), '_badgestack_point_value', true );
-	$badgestack_point_value = ( $badgestack_point_value ) ? $badgestack_point_value : 0;
-	
-	$badgestack_sequential = get_post_meta( absint( $post->ID ), '_badgestack_badge_sequential', true );
-	$badgestack_sequential = ( $badgestack_sequential ) ? $badgestack_sequential : 'non-sequential';
-	
-	//nonce for security
-	wp_nonce_field( 'badgestack_update_meta_data', 'badgestack_security_nonce' );
-
-	?>
-	<p>
-		<?php _e( 'How do you want to earn this Badge?', 'badgestack' ); ?>
-		<select name="badge_unlock_options">
-			<option value="earning_achievements" <?php selected( $badgestack_unlock_options, 'earning_achievements' ); ?>><?php _e( 'Completing Achievements', 'badgestack' ); ?></option>
-			<option value="giving" <?php selected( $badgestack_unlock_options, 'giving' ); ?>><?php _e( 'Reward by Giving / Nomination', 'badgestack' ); ?></option>
-		</select>
-	</p>
-	<p>
-		<?php _e( 'Require Sequential?', 'badgestack' ); ?>
-		<select name="badge_sequential_option">
-			<option value="non-sequential" <?php selected( $badgestack_sequential, 'non-sequential' ); ?>><?php _e( 'Non-Sequential', 'badgestack' ); ?></option>
-			<option value="sequential" <?php selected( $badgestack_sequential, 'sequential' ); ?>><?php _e( 'Sequential', 'badgestack' ); ?></option>
-		</select>
-	</p>
-	<p>
-		<strong><?php _e( 'Point Value', 'badgestack' ); ?>: </strong>
-		<input type="text" name="badgestack_point_value" value="<?php echo absint( $badgestack_point_value ); ?>" />
-	</p>
-	<?php
+/**
+ * Render a text-only field type for our CMB integration.
+ *
+ * @since  1.0.0
+ * @param  array $field The field data array
+ * @param  string $meta The stored meta for this field (which will always be blank)
+ * @return string       HTML markup for our field
+ */
+function badgeos_cmb_render_text_only( $field = array() , $meta = '' ) {
+	echo $field['desc'];
 }
+add_action( 'cmb_render_text_only', 'badgeos_cmb_render_text_only', 10, 2 );
 
-//Meta box for Steps metadata fields
-function badgestack_step_details_meta_box( $post ){
-	
-	$badgestack_step_description = get_post_meta( $post->ID, '_badgestack_step_description', true );
-	$badgestack_completing_step_means = get_post_meta( $post->ID, '_badgestack_completing_step_means', true );
-	$badgestack_submission_instructions = get_post_meta( $post->ID, '_badgestack_submission_instructions', true );
-	$badgestack_discuss_after = get_post_meta( $post->ID, '_badgestack_discuss_after', true );
-	$badgestack_discussforum_prompt = get_post_meta( $post->ID, '_badgestack_discussforum_prompt', true );
-	$badgestack_learn_even_more = get_post_meta( $post->ID, '_badgestack_learn_even_more', true );
-	$badgestack_unlock_options = get_post_meta( $post->ID, '_badgestack_step_unlock_options', true );
+add_action( 'add_meta_boxes', 'badgeos_submission_attachments_meta_box' );
 
-	$badgestack_step_color = get_post_meta( $post->ID, '_badgestack_step_color', true );
-	$badgestack_step_color = ( $badgestack_step_color ) ? $badgestack_step_color : '#';
-	
-	//nonce for security
-	wp_nonce_field( 'badgestack_update_meta_data', 'badgestack_security_nonce' );
-	?>
-		
-    <style>
-	.mf_textarea {
-		height: 150px;
-		margin-left: 1px;
-		width: 95%;
-	}
-	.mf_caption {
-		clear: both;
-		color: #999999;
-		margin-left: 0 !important;
-	}
-	</style>
-	
-	<?php echo '<p>' .__( 'Related Badges', 'badgestack' ) .'</p>'; ?>
-	<p>
-		<?php _e( 'How do you want to earn this Step?', 'badgestack' ); ?>
-		<select name="step_unlock_options">
-			<option value="submission-review" <?php selected( $badgestack_unlock_options, 'submission-review' ); ?>><?php _e( 'Submission Review', 'badgestack' ); ?></option>
-			<option value="submission-auto" <?php selected( $badgestack_unlock_options, 'submission-auto' ); ?>><?php _e( 'Submission Auto Acceptance', 'badgestack' ); ?></option>
-		</select>
-	</p>
-	<?php
-}
+/**
+ * Register the Submission attachments meta box
+ *
+ * @since  1.1.0
+ * @return void
+ */
+function badgeos_submission_attachments_meta_box() {
 
-//Meta box for Levels metadata fields
-function badgestack_level_details_meta_box( $post ) {
-	
-	$badgestack_level_points = get_post_meta( $post->ID, '_badgestack_level_points', true );
-	$badgestack_level_points = ( $badgestack_level_points ) ? $badgestack_level_points : 0;
-	$badgestack_required_achievements = get_post_meta( $post->ID, '_badgestack_required_achievements', true );
-	$badgestack_level_color = get_post_meta( $post->ID, '_badgestack_level_color', true );
-	$badgestack_level_color = ( $badgestack_level_color ) ? $badgestack_level_color : '#';
-	
-	//nonce for security
-	wp_nonce_field( 'badgestack_update_meta_data', 'badgestack_security_nonce' );
-	?>
-		
-    <style>
-	.mf_textarea {
-		height: 150px;
-		margin-left: 1px;
-		width: 95%;
-	}
-	.mf_caption {
-		clear: both;
-		color: #999999;
-		margin-left: 0 !important;
-	}
-	</style>
-	<p>
-		<strong><?php _e( 'Level Color', 'badgestack' ); ?>: </strong>
-		<input class="color-picker" type="text" size="36" name="badgestack_level_color" value="<?php echo esc_attr( $badgestack_level_color ); ?>" />
-	</p>
-	<p>
-		<strong><?php _e( 'Points Required', 'badgestack' ); ?>: </strong>
-		<input class="color-picker" type="text" size="36" name="badgestack_level_points" value="<?php echo absint( $badgestack_level_points ); ?>" />
-	</p>
-	<?php
-		
-}
+	//register the submission attachments meta box
+	add_meta_box( 'badgeos_submission_attachments_id', __( 'Submission Attachments', 'badgeos' ), 'badgeos_submission_attachments', 'submission' );
 
-function badgestack_submission_meta_box( $post ) {
-	
-	echo '<p>' .__( 'Approve or Deny the Submission', 'badgestack' ). '</p>';
-
-	$current_status = get_post_meta( $post->ID, '_badgestack_submission_status', true );
-	$current_status = ( $current_status != '' ) ? $current_status : 'none';
-	
-	echo '<p>' .__( 'Current Status', 'badgestack' ) .': ' .$current_status .'</p>';
-
-	//check if submission user id exists, if so show the user
-	$submission_user_id = get_post_meta( $post->ID, '_badgestack_submission_user_id', true );
-	
-	if ( $submission_user_id ) {
-		
-		$user_data = get_userdata( $submission_user_id ); 
-		
-		echo '<p>' .__( 'User Nominated', 'badgestack' ) .': '.$user_data->display_name.'</p>';
-	}
-	
-	$user_id = ( get_post_type( $post ) == 'submission' ) ? $post->post_author : get_post_meta( $post->ID, '_badgestack_submission_user_id', true );
-
-	echo '<a class="button-secondary" href="'.wp_nonce_url( add_query_arg( array( 'badgestack_status' => 'approve', 'post_id' => absint( $post->ID ), 'user_id' => absint( $user_id ) ) ), 'badgestack_status_action' ).'">'.__( 'Approve', 'badgestack' ).'</a>&nbsp;&nbsp;';
-	echo '<a class="button-secondary" href="'.wp_nonce_url( add_query_arg( array( 'badgestack_status' => 'deny', 'post_id' => absint( $post->ID ), 'user_id' => absint( $user_id ) ) ), 'badgestack_status_action' ).'">'.__( 'Deny', 'badgestack' ).'</a>';
-	
 }
 
 /**
- * Save submitted meta box data
+ * Display all Submission attachments in a meta box
  *
- *
+ * @since  1.1.0
+ * @param  object $post The post content
+ * @return object 		The modified post content
  */
-function badgestack_save_meta_box_data( $post_id ) {
-	global $badgestack;
+function badgeos_submission_attachments( $post = null) {
 
-	if ( get_post_type( $post_id ) == 'badge' && isset( $_POST['badge_unlock_options'] ) ) {
-		//Process Badges CPT meta data and the Steps meta box
-		
-		//if autosave, skip
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) 
-			return;
-
-		//check nonce for security
-		check_admin_referer( 'badgestack_update_meta_data', 'badgestack_security_nonce' );
-
-		//update badge step array
-		if ( isset( $_POST['steplist'] ) && ( $badge_steplist = $_POST['steplist'] ) ) {
-			$checkbox = array_map( 'absint', $badge_steplist );
-			update_post_meta( $post_id, '_badgestack_steps', $checkbox );
-		}
-
-		//update badge options
-		if ( isset( $_POST['badge_unlock_options'] ) && ( $badge_unlock_options = $_POST['badge_unlock_options'] ) ) {
-			update_post_meta( $post_id, '_badgestack_badge_unlock_options', strip_tags( $badge_unlock_options ) );
-		}
-		
-		if ( isset( $_POST['badge_sequential_option'] ) && ( $badge_sequential_option = $_POST['badge_sequential_option'] ) ) {
-			update_post_meta( $post_id, '_badgestack_badge_sequential', strip_tags( $badge_sequential_option ) );
-		}
-		
-		if ( isset( $_POST['badgestack_point_value'] ) && ( $badgestack_point_value = $_POST['badgestack_point_value'] ) ) {
-			update_post_meta( $post_id, '_badgestack_point_value', absint( $badgestack_point_value ) );
-		}
-		
-		if ( isset( $_POST['badge_required_achievements'] ) && ( $badge_required_achievements = $_POST['badge_required_achievements'] ) ) {
-			update_post_meta( $post_id, '_badgestack_badge_required_achievements', strip_tags( $badge_required_achievements ) );
-		}
-		
-		//update badge step array
-		if ( isset( $_POST['required_achievements'] ) && ( $required_achievements = $_POST['required_achievements'] ) ) {
-			$checkbox = array_map( 'absint', $required_achievements );
-			update_post_meta( $post_id, '_badgestack_required_achievements', $checkbox );
-		}
-	} elseif ( get_post_type( $post_id ) == 'step' && ( isset( $_POST['step_unlock_options'] ) ) ) {
-		//Process Steps CPT meta data from the Badges meta box
-
-		//if autosave, skip
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) 
-			return;
-
-		//check nonce for security
-		check_admin_referer( 'badgestack_update_meta_data', 'badgestack_security_nonce' );
-
-		//update badge step array
-		if ( isset( $_POST['badgelist'] ) ) {
-			$checkbox = array_map( 'absint', $_POST['badgelist'] );
-			update_post_meta( $post_id, '_badgestack_badges', $checkbox );
-		}
-
-		//allowed HTML tags for the editor
-		$allowedtags = array(
-			'a' => array(
-				'href' => array(),
-				'title' => array()
-				),
-			'abbr' => array(
-				'title' => array()
-				),
-			'acronym' => array(
-				'title' => array()
-				),
-			'code' => array(),
-			'em' => array(),
-			'strong' => array(),
-			'img'	=> array(
-				'src' => array(),
-				'alt' => array(),
-				'title' => array(),
-				'width' => array(),
-				'height' => array(),
-				'class' => array()
-			)
-		);
-
-		if ( isset( $_POST['step_unlock_options'] ) && ( $badgestack_step_unlock_options = $_POST['step_unlock_options'] ) ) {
-			update_post_meta( $post_id, '_badgestack_step_unlock_options', strip_tags( $badgestack_step_unlock_options ) );
-		}
-		
-		if ( isset( $_POST['badgestack_step_color'] ) && ( $badgestack_step_color = $_POST['badgestack_step_color'] ) ) {
-			update_post_meta( $post_id, '_badgestack_step_color', strip_tags( $badgestack_step_color ) );
-		}
-		
-		if ( isset( $_POST['badgestack_step_description'] ) && ( $badgestack_step_description = $_POST['badgestack_step_description'] ) ) {
-			update_post_meta( $post_id, '_badgestack_step_description', wp_kses( $badgestack_step_description, $allowedtags ) );
-		}
-		
-		if ( isset( $_POST['badgestack_completing_step_means'] ) && ( $badgestack_completing_step_means = $_POST['badgestack_completing_step_means'] ) ) {
-			update_post_meta( $post_id, '_badgestack_completing_step_means', wp_kses( $badgestack_completing_step_means, $allowedtags ) );
-		}
-
-		if ( isset( $_POST['badgestack_submission_instructions'] ) && ( $badgestack_submission_instructions = $_POST['badgestack_submission_instructions'] ) ){
-			update_post_meta( $post_id, '_badgestack_submission_instructions', wp_kses( $badgestack_submission_instructions, $allowedtags ) );
-		}
-		
-		if ( isset( $_POST['badgestack_discuss_after'] ) && ( $badgestack_discuss_after = $_POST['badgestack_discuss_after'] ) ) {
-			update_post_meta( $post_id, '_badgestack_discuss_after', wp_kses( $badgestack_discuss_after, $allowedtags ) );
-		}
-		
-		if ( isset( $_POST['badgestack_discussforum_prompt'] ) && ( $badgestack_discussforum_prompt = $_POST['badgestack_discussforum_prompt'] ) ) {
-			update_post_meta( $post_id, '_badgestack_discussforum_prompt', wp_kses( $badgestack_discussforum_prompt, $allowedtags ) );
-		}
-	}elseif ( get_post_type( $post_id ) == 'level' ) {
-		//Process Levels CPT metadata
-
-		//if autosave, skip
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) 
-			return;
-
-		return;
-		
-		if ( isset( $_POST['badgestack_level_color'] ) && ( $badgestack_level_color = $_POST['badgestack_level_color'] ) ) {
-			update_post_meta( $post_id, '_badgestack_level_color', $badgestack_level_color );
-		}
-		
-		if ( isset( $_POST['badgestack_level_points'] ) && ( $badgestack_level_points = $_POST['badgestack_level_points'] ) ) {
-			update_post_meta( $post_id, '_badgestack_level_points', $badgestack_level_points );
-		}
-		
-		if ( isset( $_POST['required_achievements'] ) && ( $badgestack_required_achievements = $_POST['required_achievements'] ) ) {
-			$badgestack_required_achievements = array_map( 'absint', $badgestack_required_achievements );
-			update_post_meta( $post_id, '_badgestack_required_achievements', $badgestack_required_achievements );
-		}
+	//return all submission attachments
+	if ( $submission_attachments = badgeos_get_submission_attachments( absint( $post->ID ) ) ) {
+		echo $submission_attachments;
+	}else{
+		_e( 'No attachments on this submission', 'badgeos' );
 	}
 
-	//get exisitng steps for this badge and wipe out badge id
-	$steps = get_post_meta( $post_id, '_badgestack_steps', true );
-	if ( is_array( $steps ) && 1 == 2 ) { 
-		//disable for now
-		foreach ( $steps as $key => $value ) {
-			$step_id = $value;
-			$badges = get_post_meta( $step_id, '_wds_lt_badges', true );
-			if ( is_array( $badges ) ) {
-				$key = array_search( $post_ID, $badges );
-				unset( $badges[$key] );
-			}
-			update_post_meta( $step_id, '_wds_lt_badges', $badges );
-		}
-	}
-
-
-	//update step badges array
-	if ( 1 == 2 ) { 
-	//disable for now
-		foreach ( $checkbox as $key => $value ) {
-			$step_id = $value;
-			$badges = get_post_meta( $step_id, '_wds_lt_badges', true );
-			if ( ! is_array( $badges ) ) {
-				$badges = array( $post_ID );
-			} else {
-				array_push( $badges, $post_ID );
-			}
-			update_post_meta( $step_id, '_wds_lt_badges', $badges );
-		}
-	}
-	
-	// Save Triggers Meta
-
-	foreach ( $badgestack->activity_triggers as $trigger ) {
-		if ( isset( $_POST[ $trigger['trigger_hook'] . '_times' ] ) )
-			$times = $_POST[ $trigger['trigger_hook'] . '_times' ];
-		
-		if ( ! isset( $times ) && isset( $_POST[ $trigger[ 'trigger_hook' ] ] ) && $_POST[ $trigger[ 'trigger_hook' ] ] == 1 )
-			$times = 1;
-		elseif ( isset( $_POST[ $trigger[ 'trigger_hook' ] ] ) && $_POST[$trigger['trigger_hook']] != '1' )
-			$times = 0;
-
-		if ( isset( $times ) && $times )
-			update_post_meta( $post_id, '_badgestack_trigger_' . $trigger['trigger_hook'], $times );
-		else
-			delete_post_meta( $post_id, '_badgestack_trigger_' . $trigger['trigger_hook'] );
-	}
-	
-	return;
-}
-
-/**
- * Output the triggers meta box.
- *
- *
- */
-function badgestack_triggers_meta_box( $post ) {
-	global $badgestack;
-	echo '<table>';
-	echo '<tr><td>Activity</td><td># of Times</td></tr>';
-
-	foreach ( $badgestack->activity_triggers as $trigger ) {
-        $this_times = get_post_meta( $post->ID, '_badgestack_trigger_' . $trigger['trigger_hook'], true );
-	    if ( $this_times > 0 )
-			$checked = 'checked';
-	    else
-			$checked = '';
-
-		echo '<tr>';
-		echo "<td class='trigger-name'><input type='checkbox' $checked name='" . $trigger['trigger_hook'] . "' value='1'> " . $trigger['trigger_description'] . '</td>';
-		echo "<td class='trigger-number'><input type='text' name='" . $trigger['trigger_hook'] . "_times' value='$this_times'></td>";
-		echo '</tr>';
-	}
-
-	echo '</table>';
 }

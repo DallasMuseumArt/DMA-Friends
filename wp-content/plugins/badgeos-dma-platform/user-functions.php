@@ -8,16 +8,7 @@
  * @return int          The current user ID if no ID provided
  */
 function dma_get_user_id( $user_id = 0 ) {
-
-	// Grab the current user if no user_id is specified
-	if ( ! $user_id ) {
-		get_currentuserinfo();
-		global $current_user;
-		$user_id = $current_user->ID;
-	}
-
-	return $user_id;
-
+	return $user_id ? $user_id : get_current_user_id();
 }
 
 /**
@@ -31,71 +22,6 @@ function dma_user_profile() {
 }
 
 /**
- * Get all DMA cards earned by a user within a specified number of days
- *
- * @since  1.0
- * @param  int $user_id       The given user's ID
- * @param  int $limit_in_days How many days to look back (default: all time)
- * @param  string $term_id    A specific term_id to use for limiting results
- * @return array|bool         An array of $post objects, or false if none
- */
-function dma_get_all_user_checkins( $user_id = 0, $limit_in_days = 0, $term_id = false ) {
-
-	// If we don't grab the global $wpbd, the world will end
-	global $wpdb;
-
-	// If no user specified, pull data from current user
-	if ( 'all' == $user_id )
-		$user_limit = '';
-	else
-		$user_limit = "AND post_author = '" . dma_get_user_id( $user_id ) . "'";
-
-	// If we specified a user ID, limit results to just that user
-
-
-	// If we specified a date limit, do it up propa'
-	$date_limit = $limit_in_days ? " AND post_date >= '" . date( 'Y-m-d', strtotime( $limit_in_days . ' days ago' ) ) . "'" : '';
-
-	// If we specified a specific taxonomy, set up our query for that
-	$term_join = $term_id ? " LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id) " : "";
-	$term_limit = $term_id ? " AND $wpdb->term_relationships.term_taxonomy_id = '" . $term_id . "'" : "";
-
-	// Query our posts table for all earned cards
-	$earned_checkins = $wpdb->get_results(
-		"
-		SELECT *
-		FROM $wpdb->posts
-			" . $term_join . "
-		WHERE post_type = 'checkin'
-			" . $user_limit . "
-			" . $date_limit . "
-			" . $term_limit . "
-		"
-	);
-
-	// Return an array of the user's earned cards, or false if none
-	return $earned_checkins ? $earned_checkins : false;
-
-}
-
-/**
- * Check to see if current user has any achievement(s)
- *
- * @since  1.0
- * @param  integer $user_id        The given User's ID (defaults to current user if false)
- * @param  integer $single_post_id The ID of a specific achievement to find (looks for all if false)
- * @param  string  $post_type      A specific post type to search for (looks for all if false)
- * @param  integer $limit_in_days  A specific number of days to look back (searches all time if false)
- * @return array|bool 			   An array of earned achievements (if any), or false if none
- */
-function dma_check_if_user_has_achievement( $user_id = 0, $single_post_id = false, $post_type = false, $limit_in_days = false, $since = 0 ) {
-
-	$achievement_check = new DMA_Base( $user_id );
-	return $achievement_check->badgestack_achievements( $user_id, $single_post_id, $post_type, $limit_in_days, $since );
-
-}
-
-/**
  * Helper function for building an array of user avatars
  *
  * @since  1.0
@@ -105,25 +31,30 @@ function dma_user_avatars( $ordered = true ) {
 
 	// init our $avatars info array
 	$avatars = array();
+
 	// loop through all the files in the plugin's avatars directory and parse the file names
 	foreach ( glob( plugin_dir_path(__FILE__) . 'images/avatars/*.jpg' ) as $file ) {
 		// remove path info
-		$filename = end( explode( '/', $file ) );
+		$filename   = end( explode( '/', $file ) );
+
 		// separate text
-		$fileparts = explode( '-', $filename );
+		$fileparts  = explode( '-', $filename );
 		$fileparts2 = explode( '.', array_pop( $fileparts ) );
+
 		// the number value is the images place in the order
-		$order = $fileparts2[0];
-		$file_ext = $fileparts2[1];
+		$order      = $fileparts2[0];
+		$file_ext   = $fileparts2[1];
+
 		// build our array out of the parts
 		$avatar_array = array(
-			'id' => str_replace( '.jpg', '', $filename ),
-			'order' => $order,
+			'id'       => str_replace( '.jpg', '', $filename ),
+			'order'    => $order,
 			'filename' => $filename,
-			'desc' => join( ' ', $fileparts ),
+			'desc'     => join( ' ', $fileparts ),
 			'file_ext' => $fileparts2[1],
-			'url' => plugins_url( '/images/avatars/'.$filename, __FILE__ ),
+			'url'      => plugins_url( '/images/avatars/'.$filename, __FILE__ ),
 		);
+
 		if ( $ordered )
 			$avatars[$order] = $avatar_array;
 		else
@@ -191,10 +122,10 @@ function dma_get_user_avatar( $args = array() ) {
 
 	// Setup our defaults
 	$defaults = array(
-		'user_id'	=> dma_get_user_id(),
-		'width'		=> 192,
-		'height'	=> 192,
-		'url_only'	=> false
+		'user_id'  => dma_get_user_id(),
+		'width'    => 192,
+		'height'   => 192,
+		'url_only' => false
 	);
 	$args = wp_parse_args( $args, $defaults );
 
@@ -239,6 +170,9 @@ function dma_get_user_avatar( $args = array() ) {
  * @return nothing
  */
 function dma_add_user_profile_fields( $user ) {
+	if ( !current_user_can( 'manage_options' ) )
+		return;
+
 	?>
 	<h2><?php _e('DMA Profile Information', 'your_textdomain'); ?></h2>
 	<table class="form-table">
@@ -307,7 +241,7 @@ function dma_add_user_profile_fields( $user ) {
 		<tr>
 			<th><label for="user_points">User Points</label></th>
 			<td>
-				<input type="text" name="user_points" id="user_points" value="<?php echo absint( get_user_meta( $user->ID, '_dma_points', true ) ); ?>" class="regular-text" /><br />
+				<input type="text" name="user_points" id="user_points" value="<?php echo absint( get_user_meta( $user->ID, '_badgeos_points', true ) ); ?>" class="regular-text" /><br />
 				<span class="description">The user's points total. Entering a new total will automatically log the change and difference between totals.</span>
 			</td>
 		</tr>
@@ -318,6 +252,7 @@ function dma_add_user_profile_fields( $user ) {
 				<span class="description"></span>
 			</td>
 		</tr>
+		<?php echo $GLOBALS['badgeos_credly']->credly_profile_setting( $user ); ?>
 		<tr>
 			<th><label for="user_avatar">Avatar</label></th>
 			<td>
@@ -336,6 +271,7 @@ function dma_add_user_profile_fields( $user ) {
 <?php }
 add_action( 'show_user_profile', 'dma_add_user_profile_fields' );
 add_action( 'edit_user_profile', 'dma_add_user_profile_fields' );
+//remove_action( 'personal_options', array( $GLOBALS['badgeos_credly'], 'credly_profile_setting' ), 999 ); //this isn't working
 
 /**
  * Save extra user meta fields to the Edit Profile screen
@@ -351,7 +287,6 @@ function dma_save_user_profile_fields( $user_id ) {
 
 	// Burn our optin settings (necessary because a "no" value is an unset checkmark, which passes nothing below)
 	dma_update_user_data( $user_id, 'email_optin', false );
-	dma_update_user_data( $user_id, 'credly_optin', false );
 	dma_update_user_data( $user_id, 'current_member', false );
 
 	// Loop through all our submitted data
@@ -367,7 +302,6 @@ function dma_save_user_profile_fields( $user_id ) {
 			case 'phone' :
 			case 'twitter' :
 			case 'email_optin' :
-			case 'credly_optin' :
 			case 'street_address' :
 			case 'apt_suite' :
 			case 'city' :
@@ -384,87 +318,12 @@ function dma_save_user_profile_fields( $user_id ) {
 	}
 
 	// Update our user's points total, but only if edited
-	if ( $_POST['user_points'] != get_user_meta( $user_id, '_dma_points', true ) )
-		dma_update_users_points( $user_id, absint( $_POST['user_points'] ), get_current_user_id() );
+	if ( $_POST['user_points'] != get_user_meta( $user_id, '_badgeos_points', true ) )
+		badgeos_update_users_points( $user_id, absint( $_POST['user_points'] ), get_current_user_id() );
 
 }
 add_action( 'personal_options_update', 'dma_save_user_profile_fields' );
 add_action( 'edit_user_profile_update', 'dma_save_user_profile_fields' );
-
-/**
- * Return a user's points
- *
- * @since  1.0
- * @param  string   $user_id      The given user's ID
- * @return integer  $user_points  The user's current points
- */
-function dma_get_users_points( $user_id = 0 ) {
-
-	// Grab the current user's ID if one wasn't provided
-	$user_id = dma_get_user_id( $user_id );
-
-	// Return our user's points as an integer (sanely falls back to 0 if empty)
-	return absint( get_user_meta( $user_id, '_dma_points', true ) );
-}
-
-/**
- * Posts a log entry when a user earns points
- *
- * @since  1.0
- * @param  integer $user_id    The given user's ID
- * @param  integer $new_points The new points the user is being awarded
- * @param  integer $admin_id   If being awarded by an admin, the admin's user ID
- * @return int                 The user's updated point total
- */
-function dma_update_users_points( $user_id = 0, $new_points = 0, $admin_id = 0 ) {
-
-	// Grab the current user if no user_id provided
-	$user_id = dma_get_user_id( $user_id );
-
-	// Setup our user objects
-	$user = get_userdata( $user_id );
-	$admin = get_userdata( $admin_id );
-
-	// Grab the user's current points
-	$current_points = dma_get_users_points( $user_id );
-
-	// If we're getting an admin ID, $new_points is actually the final total, so subtract the current points
-	if ( $admin_id ) $new_points = $new_points - $current_points;
-
-	// Update our user's total
-	$updated_points_total = absint( $current_points + $new_points );
-	update_user_meta( $user_id, '_dma_points', $updated_points_total );
-
-	// Alter our log message if this was an admin action
-	if ( $admin_id )
-		$log_message = sprintf( __( '%s awarded %s %s points for a new total of %s points', 'dma' ), $admin->user_login, $user->user_login, number_format( $new_points ), number_format( $updated_points_total ) );
-	else
-		$log_message = sprintf( __( '%s earned %s points for a new total of %s points', 'dma' ), $user->user_login, number_format( $new_points ), number_format( $updated_points_total ) );
-
-	// Create a badgestack log entry
-	badgestack_post_log_entry( null, $user_id, 'points', $log_message );
-
-	return $updated_points_total;
-}
-
-/**
- * Award new points to a user based on logged activites and earned badges
- *
- * @since  1.0
- * @param  integer $user_id        The given user's ID
- * @param  integer $achievement_id The given achievement's post ID
- * @return integer                 The user's updated points total
- */
-// @TODO: This should get attached to the badgestack_create_log_entry hook instead for a more sane log order
-add_action( 'dma_award_user_points', 'dma_award_user_points', 10, 2 );
-function dma_award_user_points( $user_id, $achievement_id ) {
-
-	// Grab our points from the provided post
-	$points = absint( get_post_meta( $achievement_id, '_dma_points', true ) );
-
-	if ( ! empty( $points ) )
-		return dma_update_users_points( $user_id, $points );
-}
 
 /**
  * Helper function for updating a given user field with new data
@@ -736,7 +595,7 @@ function dma_log_user_login( $user_id ) {
 
 	// Log the user's checkin if they're at a kiosk location
 	if ( $location )
-		badgestack_post_log_entry( $location->ID, $user_id, null, "$userdata->user_login checked-in at $location->post_title" );
+		badgeos_post_log_entry( $location->ID, $user_id, null, "$userdata->user_login checked-in at $location->post_title" );
 
 }
 add_action( 'user_authenticated', 'dma_log_user_login' );

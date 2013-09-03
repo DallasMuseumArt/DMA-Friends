@@ -1,6 +1,6 @@
 <?php
 
-add_action( 'init', 'dma_register_custom_post_types' );
+add_action( 'init', 'dma_register_custom_post_types', 5 );
 
 //register custom post types
 function dma_register_custom_post_types() {
@@ -24,7 +24,7 @@ function dma_register_custom_post_types() {
 		'public'             => true,
 		'publicly_queryable' => true,
 		'show_ui'            => true,
-		'show_in_menu'       => 'badgestack_badgestack',
+		'show_in_menu'       => 'badgeos_badgeos',
 		'query_var'          => true,
 		'rewrite'            => true,
 		'capability_type'    => 'post',
@@ -53,7 +53,7 @@ function dma_register_custom_post_types() {
 		'public'             => true,
 		'publicly_queryable' => true,
 		'show_ui'            => true,
-		'show_in_menu'       => 'badgestack_badgestack',
+		'show_in_menu'       => 'badgeos_badgeos',
 		'query_var'          => true,
 		'rewrite'            => array( 'slug' => 'fun-badge' ),
 		'capability_type'    => 'post',
@@ -62,66 +62,7 @@ function dma_register_custom_post_types() {
 		'menu_position'      => null,
 		'supports'           => array( 'title', 'editor', 'excerpt', 'author', 'thumbnail', 'page-attributes' )
 	) );
-	badgestack_register_achievement_type( 'Badge', 'Badges' );
-
-	register_post_type( 'dma-step', array(
-		'labels'             => array(
-			'name'               => _x( 'Steps', 'post type general name' ),
-			'singular_name'      => _x( 'Step', 'post type singular name' ),
-			'add_new'            => _x( 'Add New', 'Step' ),
-			'add_new_item'       => __( 'Add Step' ),
-			'edit_item'          => __( 'Edit Step' ),
-			'new_item'           => __( 'New Step' ),
-			'all_items'          => __( 'Steps' ),
-			'view_item'          => __( 'View Step' ),
-			'search_items'       => __( 'Search Steps' ),
-			'not_found'          =>	__( 'No Steps found' ),
-			'not_found_in_trash' => __( 'No Steps found in Trash' ),
-			'parent_item_colon'  => '',
-			'menu_name'          => __( 'Steps' ),
-		),
-		'public'             => true,
-		'publicly_queryable' => true,
-		'show_ui'            => false,
-		'show_in_menu'       => false,
-		'query_var'          => true,
-		'rewrite'            => true,
-		'capability_type'    => 'post',
-		'has_archive'        => true,
-		'hierarchical'       => false,
-		'menu_position'      => null,
-		'supports'           => array( 'title', 'editor' )
-	) );
-	badgestack_register_achievement_type( 'Step', 'Steps' );
-
-	register_post_type( 'checkin', array(
-		'labels'             => array(
-			'name'               => _x( 'Check-ins', 'post type general name' ),
-			'singular_name'      => _x( 'Check-in', 'post type singular name' ),
-			'add_new'            => _x( 'Add New', 'Check-in' ),
-			'add_new_item'       => __( 'Add New Check-in' ),
-			'edit_item'          => __( 'Edit Check-in' ),
-			'new_item'           => __( 'New Check-in' ),
-			'all_items'          => __( 'Check-ins' ),
-			'view_item'          => __( 'View Check-in' ),
-			'search_items'       => __( 'Search Check-ins' ),
-			'not_found'          =>	__( 'No Check-ins found' ),
-			'not_found_in_trash' => __( 'No Check-ins found in Trash' ),
-			'parent_item_colon'  => '',
-			'menu_name'          => __( 'Check-ins' ),
-		),
-		'public'             => true,
-		'publicly_queryable' => true,
-		'show_ui'            => true,
-		'show_in_menu'       => 'badgestack_badgestack',
-		'query_var'          => true,
-		'rewrite'            => true,
-		'capability_type'    => 'post',
-		'has_archive'        => true,
-		'hierarchical'       => false,
-		'menu_position'      => null,
-		'supports'           => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' )
-	) );
+	badgeos_register_achievement_type( 'Badge', 'Badges' );
 
 	register_post_type( 'dma-location', array(
 		'labels'             => array(
@@ -142,7 +83,7 @@ function dma_register_custom_post_types() {
 		'public'             => true,
 		'publicly_queryable' => true,
 		'show_ui'            => true,
-		'show_in_menu'       => 'badgestack_badgestack',
+		'show_in_menu'       => 'badgeos_badgeos',
 		'query_var'          => true,
 		'rewrite'            => true,
 		'capability_type'    => 'post',
@@ -171,7 +112,7 @@ function dma_register_custom_post_types() {
 		'public'             => true,
 		'publicly_queryable' => true,
 		'show_ui'            => true,
-		'show_in_menu'       => 'badgestack_badgestack',
+		'show_in_menu'       => 'badgeos_badgeos',
 		'query_var'          => true,
 		'rewrite'            => true,
 		'capability_type'    => 'post',
@@ -200,7 +141,7 @@ function dma_register_custom_post_types() {
 		'public'             => true,
 		'publicly_queryable' => true,
 		'show_ui'            => true,
-		'show_in_menu'       => 'badgestack_badgestack',
+		'show_in_menu'       => 'badgeos_badgeos',
 		'query_var'          => true,
 		'rewrite'            => true,
 		'capability_type'    => 'post',
@@ -229,7 +170,7 @@ function dma_register_custom_post_types() {
 		'public'             => true,
 		'publicly_queryable' => true,
 		'show_ui'            => true,
-		'show_in_menu'       => 'badgestack_badgestack',
+		'show_in_menu'       => 'badgeos_badgeos',
 		'query_var'          => true,
 		'rewrite'            => true,
 		'capability_type'    => 'post',
@@ -255,7 +196,7 @@ function dma_notice_admin_columns( $columns ) {
 	return $columns;
 }
 
-add_filter( 'the_title', 'dma_notices_title_display', 10, 2 );
+//add_filter( 'the_title', 'dma_notices_title_display', 10, 2 );
 /**
  * Replace title with edit text
  */

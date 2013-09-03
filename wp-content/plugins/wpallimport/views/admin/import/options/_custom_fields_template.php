@@ -6,8 +6,7 @@
 			<thead>
 				<tr>
 					<td><?php _e('Name', 'pmxi_plugin') ?></td>
-					<td><?php _e('Value', 'pmxi_plugin') ?></td>
-					<td></td>
+					<td><?php _e('Value', 'pmxi_plugin') ?></td>					
 				</tr>
 			</thead>
 			<tbody>				
@@ -38,12 +37,12 @@
 					</td>												
 				</tr>
 				<tr>
-					<td colspan="3"><a href="#add" title="<?php _e('add', 'pmxi_plugin')?>" class="action add-new-custom"><?php _e('Add more', 'pmxi_plugin') ?></a></td>												
+					<td colspan="2"><a href="#add" title="<?php _e('add', 'pmxi_plugin')?>" class="action add-new-custom"><?php _e('Add more', 'pmxi_plugin') ?></a></td>												
 				</tr>
 			</tbody>
 			</table>
 			<select class="existing_meta_keys">
-				<option value="">Existing Custom Fields...</option>
+				<option value=""><?php _e('Existing Custom Fields...','pmxi_plugin');?></option>
 				<?php				
 				$hide_fields = array('_wp_page_template', '_edit_lock', '_edit_last', '_wp_trash_meta_status', '_wp_trash_meta_time');
 				if (!empty($meta_keys) and $meta_keys->count()):

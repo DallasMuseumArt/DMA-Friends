@@ -82,12 +82,12 @@ class PMXI_Model_Record extends PMXI_Model {
 	 * Update record in database
 	 * @return PMXI_Model_Record
 	 */
-	public function update() {
-		$record = $this->toArray(TRUE);
-		$this->wpdb->update($this->table, $record, array_intersect_key($record, array_flip($this->primary)));
+	public function update() {		
+		$record = $this->toArray(TRUE);				
+		$this->wpdb->update($this->table, $record, array_intersect_key($record, array_flip($this->primary)));				
 		if ($this->wpdb->last_error) {
 			throw new Exception($this->wpdb->last_error);
-		}
+		}		
 		return $this;
 	}
 	

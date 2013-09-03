@@ -180,8 +180,8 @@ $columns = array(
 										<span class="edit"><a class="edit" href="<?php echo esc_url(add_query_arg(array('id' => $item['id'], 'action' => 'options'), $this->baseUrl)) ?>"><?php _e('Edit Options', 'pmxi_plugin') ?></a></span> |
 										<span class="update"><a class="update" href="<?php echo esc_url(add_query_arg(array('id' => $item['id'], 'action' => 'update'), $this->baseUrl)) ?>"><?php _e('Update', 'pmxi_plugin') ?></a></span> |
 
-										<?php if ( in_array($item['type'], array('url', 'ftp'))): ?>
-											<span class="edit get_cron_url"><a class="edit" href="javascript:void(0);" rel='<?php echo "wget \"".home_url()."?import_key=".PMXI_Plugin::getInstance()->getOption('cron_job_key')."&import_id=".$item['id']."&action=processing\"\n" . "wget "."\"".home_url()."?import_key=".PMXI_Plugin::getInstance()->getOption('cron_job_key')."&import_id=".$item['id']."&action=trigger"."\"";?>'><?php _e('Get Cron URL', 'pmxi_plugin') ?></a></span> |
+										<?php if ( in_array($item['type'], array('url', 'ftp', 'file'))): ?>
+											<span class="edit get_cron_url"><a class="edit" href="javascript:void(0);" rel='<?php echo "wget -q -O /dev/null \"".home_url()."?import_key=".PMXI_Plugin::getInstance()->getOption('cron_job_key')."&import_id=".$item['id']."&action=processing\"\n" . "wget -q -O /dev/null "."\"".home_url()."?import_key=".PMXI_Plugin::getInstance()->getOption('cron_job_key')."&import_id=".$item['id']."&action=trigger"."\"";?>'><?php _e('Get Cron URL', 'pmxi_plugin') ?></a></span> |
 											<span class="edit"><a class="edit" href="<?php echo esc_url(add_query_arg(array('id' => $item['id'], 'action' => 'scheduling'), $this->baseUrl)) ?>"><?php _e('Cron Scheduling', 'pmxi_plugin') ?></a></span> |
 										<?php endif; ?>
 										<span class="update"><a class="update" href="<?php echo esc_url(add_query_arg(array('page' => 'pmxi-admin-import', 'id' => $item['id']), admin_url('admin.php'))) ?>"><?php _e('Use New File', 'pmxi_plugin') ?></a></span> |

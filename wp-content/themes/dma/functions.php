@@ -65,24 +65,27 @@ add_action( 'wp_head', 'dma_location_info' );
  */
 function dma_location_info() {
 
-	if ( isset( $_SESSION['location_id'] ) ) {
-		$post_id = &$_SESSION['location_id'];
-		$post = get_post( $post_id );
-		if ( empty( $post ) )
-			return;
+	// Set a default location
+	$post_id = 80;
 
-		$GLOBALS['dma_location'] = &$post;
-		$post->bg = wp_get_attachment_image_src( get_post_thumbnail_id( $post_id ), 'full-bg' );
+	// Get the current location
+	// $post_id = &$_SESSION['location_id'];
 
-		if ( ! is_user_logged_in() )
-			echo '
-			<style type="text/css">
-				body:not(.location-setup) #wrap {
-					background: url('. $post->bg[0] .') no-repeat top left;
-				}
-			</style>
-			';
-	}
+	$post = get_post( $post_id );
+	if ( empty( $post ) )
+		return;
+
+	$GLOBALS['dma_location'] = &$post;
+	$post->bg = wp_get_attachment_image_src( get_post_thumbnail_id( $post_id ), 'full-bg' );
+
+	if ( ! is_user_logged_in() )
+		echo '
+		<style type="text/css">
+			body:not(.location-setup) #wrap {
+				background: url('. $post->bg[0] .') no-repeat top left;
+			}
+		</style>
+		';
 }
 
 add_action( 'genesis_after_footer', 'dma_location_info_footer' );

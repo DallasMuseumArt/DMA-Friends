@@ -103,7 +103,11 @@ class XmlImportTemplateCodeGenerator
     {
        $filename = tempnam(XmlImportConfig::getInstance()->getCacheDirectory(), 'xim');
     }
-	
+	  if ( ! $filename or ! @is_writable($filename) ){
+      $uploads  = wp_upload_dir();
+      $filename = $uploads['path'] . '/' . wp_unique_filename($uploads['path'], 'tmpfile');
+    }
+    
     file_put_contents($filename, $result);
     return $filename;
   }

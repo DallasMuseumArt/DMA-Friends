@@ -20,7 +20,7 @@ class WDS_Inactivity_Logout {
 
 		add_action( 'wp_footer', array( &$this, 'logout_timer' ) );
 		add_action( 'wp_enqueue_scripts', array( &$this, 'enqueue_scripts' ) );
-		add_action( 'badgestack_settings', array( &$this, 'timer_settings' ) );
+		add_action( 'badgeos_settings', array( &$this, 'timer_settings' ) );
 
 	}
 
@@ -36,14 +36,14 @@ class WDS_Inactivity_Logout {
 		wp_register_script('logout-timer', plugins_url( '/js/logout-timer.js', __FILE__ ), array( 'jquery-idle-timer' ), '1.0', true );
 
 		// Setup our configurable data
-		$timer_settings = get_option( 'badgestack_settings' );
+		$timer_settings = get_option( 'badgeos_settings' );
 		$timer_data = array(
 			'logout_alert_container'     => '#idletimeout',
 			'coutndown_container'        => '#idletimeout-countdown',
-			'logged_in_idle_timer'       => isset( $timer_settings['logged_in_idle_timer'] ) ? $timer_settings['logged_in_idle_timer'] : 30,
+			'logged_in_idle_timer'       => isset( $timer_settings['logged_in_idle_timer'] ) ? $timer_settings['logged_in_idle_timer'] : 20,
 			'logged_out_idle_timer'      => isset( $timer_settings['logged_out_idle_timer'] ) ? $timer_settings['logged_out_idle_timer'] : 300,
-			'logged_in_countdown'        => isset( $timer_settings['logged_in_countdown'] ) ? $timer_settings['logged_in_countdown'] : 45,
-			'extra_seconds'              => isset( $timer_settings['extra_seconds'] ) ? $timer_settings['extra_seconds'] : 15,
+			'logged_in_countdown'        => isset( $timer_settings['logged_in_countdown'] ) ? $timer_settings['logged_in_countdown'] : 30,
+			'extra_seconds'              => isset( $timer_settings['extra_seconds'] ) ? $timer_settings['extra_seconds'] : 10,
 			'logged_out_countdown'       => 1,
 			'logout_url'                 => wp_logout_url(),
 			'keepalive_url'              => '',
@@ -96,7 +96,7 @@ class WDS_Inactivity_Logout {
 	}
 
 	/**
-	 * Adds an admin option section in the Badgestack options page for setting the logout timer
+	 * Adds an admin option section in the BadgeOS options page for setting the logout timer
 	 *
 	 * @since 1.0
 	 * @return void
@@ -105,30 +105,30 @@ class WDS_Inactivity_Logout {
 		?>
 		<tr><td colspan="2"><hr/><h2>Inactivity Timer Settings</h2></td></tr>
 		<tr valign="top">
-			<th scope="row"><label for="logged_out_idle_timer"><?php _e( 'Logged-out Idle Timer', 'badgestack' ); ?></label></th>
+			<th scope="row"><label for="logged_out_idle_timer"><?php _e( 'Logged-out Idle Timer', 'wds-inactivity' ); ?></label></th>
 			<td>
-				<input id="logged_out_idle_timer" type="text" name="badgestack_settings[logged_out_idle_timer]" value="<?php echo isset( $timer_settings['logged_out_idle_timer'] ) ? $timer_settings['logged_out_idle_timer'] : 300; ?>" /><BR>
+				<input id="logged_out_idle_timer" type="text" name="badgeos_settings[logged_out_idle_timer]" value="<?php echo isset( $timer_settings['logged_out_idle_timer'] ) ? $timer_settings['logged_out_idle_timer'] : 300; ?>" /><BR>
 				<p class="description">The amount of time (in seconds) before refreshing the logged-out homepage.</p>
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><label for="logged_in_idle_timer"><?php _e( 'Logged-in Idle Timer', 'badgestack' ); ?></label></th>
+			<th scope="row"><label for="logged_in_idle_timer"><?php _e( 'Logged-in Idle Timer', 'wds-inactivity' ); ?></label></th>
 			<td>
-				<input id="logged_in_idle_timer" type="text" name="badgestack_settings[logged_in_idle_timer]" value="<?php echo isset( $timer_settings['logged_in_idle_timer'] ) ? $timer_settings['logged_in_idle_timer'] : 45; ?>" /><BR>
+				<input id="logged_in_idle_timer" type="text" name="badgeos_settings[logged_in_idle_timer]" value="<?php echo isset( $timer_settings['logged_in_idle_timer'] ) ? $timer_settings['logged_in_idle_timer'] : 20; ?>" /><BR>
 				<p class="description">The amount of time (in seconds) before an inactivity modal is displayed to logged-in users.</p>
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><label for="logged_in_countdown"><?php _e( 'Logged-in Countdown', 'badgestack' ); ?></label></th>
+			<th scope="row"><label for="logged_in_countdown"><?php _e( 'Logged-in Countdown', 'wds-inactivity' ); ?></label></th>
 			<td>
-				<input id="logged_in_countdown" type="text" name="badgestack_settings[logged_in_countdown]" value="<?php echo isset( $timer_settings['logged_in_countdown'] ) ? $timer_settings['logged_in_countdown'] : 45; ?>" /><BR>
+				<input id="logged_in_countdown" type="text" name="badgeos_settings[logged_in_countdown]" value="<?php echo isset( $timer_settings['logged_in_countdown'] ) ? $timer_settings['logged_in_countdown'] : 30; ?>" /><BR>
 				<p class="description">The amount of time (in seconds) a user has to respond to the inactivity modal.</p>
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><label for="extra_seconds"><?php _e( 'Extra Time for Failure', 'badgestack' ); ?></label></th>
+			<th scope="row"><label for="extra_seconds"><?php _e( 'Extra Time for Failure', 'wds-inactivity' ); ?></label></th>
 			<td>
-				<input id="extra_seconds" type="text" name="badgestack_settings[extra_seconds]" value="<?php echo isset( $timer_settings['extra_seconds'] ) ? $timer_settings['extra_seconds'] : 45; ?>" /><BR>
+				<input id="extra_seconds" type="text" name="badgeos_settings[extra_seconds]" value="<?php echo isset( $timer_settings['extra_seconds'] ) ? $timer_settings['extra_seconds'] : 30; ?>" /><BR>
 				<p class="description">Additional seconds a user gains for an incorrect PIN.</p>
 			</td>
 		</tr>

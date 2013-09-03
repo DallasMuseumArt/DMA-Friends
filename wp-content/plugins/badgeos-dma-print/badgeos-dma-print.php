@@ -22,12 +22,12 @@ function dma_print_user_id( $user_id, $username, $first_name, $last_name, $locat
 //Print a Reward voucher when redeeming a reward
 add_action( 'dma_user_claimed_reward', 'dma_printer_reward_claim', 10, 3 );
 function dma_printer_reward_claim( $user_id, $reward_id, $location_printer_ip ) {
-	
+
 	//load reward metadata
 	$reward_fine_print = get_post_meta( absint( $reward_id ), '_dma_reward_fine_print', true );
 	$reward_barcode = get_post_meta( absint( $reward_id ), '_dma_reward_barcode', true );
 	$expire_days = get_post_meta( absint( $reward_id ), '_dma_reward_days_valid', true );
-	
+
 	//generate expires date based on days valid metadata
 	$expires = date( 'm-d-Y', strtotime( "+" .absint( $expire_days )." days" ) );
 
@@ -38,10 +38,10 @@ function dma_printer_reward_claim( $user_id, $reward_id, $location_printer_ip ) 
 }
 
 // create custom plugin settings menu
-add_action( 'admin_menu', 'badgestack_dma_print_menu', 99 );
-function badgestack_dma_print_menu() {
+add_action( 'admin_menu', 'badgeos_dma_print_menu', 99 );
+function badgeos_dma_print_menu() {
 
-	add_submenu_page( 'badgestack_badgestack', 'Print', 'Print', 'manage_options', 'badgestack_print_help', 'badgestack_dma_test_print' );
+	add_submenu_page( 'badgeos_badgeos', 'Print', 'Print', 'manage_options', 'badgeos_print_help', 'badgeos_dma_test_print_page' );
 
 }
 
@@ -50,26 +50,26 @@ add_action( 'admin_init', 'badgeos_dma_test_print' );
 function badgeos_dma_test_print() {
 
 	if ( isset( $_POST['test_print'] ) ) {
-		
+
 		//nonce for security
 		check_admin_referer( 'test-print-membership-card', 'dma-admin-print' );
-		
+
 		dma_print_user_id( 1, $_POST['number'], 'John', 'Doe', $_POST['printer'] );
 	}
-	
+
 	if ( isset( $_POST['test_reward'] ) ) {
-		
+
 		//nonce for security
 		check_admin_referer( 'test-print-reward-card', 'dma-admin-print' );
-		
+
 		dma_printer_reward_claim( 1, $_POST['reward'], $_POST['printer'] );
 	}
-	
+
 	if ( isset( $_POST['reprint_user_card'] ) ) {
-		
+
 		//nonce for security
 		check_admin_referer( 'print-membership-card', 'dma-admin-print' );
-		
+
 		$user_id = $_POST['user_id'];
 		$user_info = get_userdata( absint( $user_id ) );
 		$username = $user_info->user_login;
@@ -83,7 +83,7 @@ function badgeos_dma_test_print() {
 
 }
 
-function badgestack_dma_test_print() {
+function badgeos_dma_test_print_page() {
 	?>
 	<h2>Test ID Card Printing</h2>
 	<form method="post">
@@ -120,9 +120,9 @@ function badgestack_dma_test_print() {
 
 			$the_ads = get_posts( $args );
 			foreach ( $the_ads as $ad ) {
-				
+
 				echo '<option value="'.$ad->ID.'">'.$ad->post_title.'</option>';
-				
+
 			}
 			?>
 		</select><br />
@@ -138,7 +138,7 @@ function badgestack_dma_test_print() {
 		<input type="hidden" name="printtype" value="idcard" />
 
 		<label for="name">Username</label>
-		
+
 		<select name="user_id">
 			<?php
 			$users = get_users( 'orderby=nicename' );
@@ -152,7 +152,7 @@ function badgestack_dma_test_print() {
 
 		<input type="submit" name="reprint_user_card" value="Reprint Card" />
 	</form>
-	
+
 	<?php
 
 }

@@ -4,7 +4,7 @@
  * and can be changed by corresponding wordpress function calls
  */
 $config = array(
-	"info_api_url" => "http://www.wpallimport.com/adminpanel/update/info.php",
+	/*"info_api_url" => "http://www.wpallimport.com/adminpanel/update/info.php",*/
 	"history_file_count" => 10000,
 	"history_file_age" => 365,
 	"highlight_limit" => 10000,
@@ -16,5 +16,9 @@ $config = array(
 	"html_entities" => 0,
 	"utf8_decode" => 0,
 	"cron_job_key" => url_title(rand_char(12)),
-	"chunk_size" => 64
+	"chunk_size" => 32,
+	"pingbacks" => 1,
+	"legacy_special_character_handling" => 0,
+	"case_sensitive" => 1,
+	"session_mode" => 'default'
 );

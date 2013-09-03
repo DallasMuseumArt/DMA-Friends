@@ -1,7 +1,7 @@
 <tr>
 	<td colspan="3">
 		<fieldset class="optionsset">
-			<legend>Record Matching</legend>
+			<legend><?php _e('Record Matching','pmxi_plugin');?></legend>
 			<div class="input" style="margin-bottom:15px;">
 				<input type="radio" id="auto_matching_<?php echo $entry; ?>" class="switcher" name="duplicate_matching" value="auto" <?php echo 'manual' != $post['duplicate_matching'] ? 'checked="checked"': '' ?>/>
 				<label for="auto_matching_<?php echo $entry; ?>"><?php _e('Automatic Record Matching', 'pmxi_plugin' )?></label><br>
@@ -24,9 +24,9 @@
 						<label for="duplicate_indicator_content_<?php echo $entry; ?>"><?php _e('content', 'pmxi_plugin' )?></label><br>
 						<input type="radio" id="duplicate_indicator_custom_field_<?php echo $entry; ?>" class="switcher" name="duplicate_indicator" value="custom field" <?php echo 'custom field' == $post['duplicate_indicator'] ? 'checked="checked"': '' ?>/>
 						<label for="duplicate_indicator_custom_field_<?php echo $entry; ?>"><?php _e('custom field', 'pmxi_plugin' )?></label><br>
-						<span class="switcher-target-duplicate_indicator_custom_field_<?php echo $entry; ?>" style="vertical-align:middle" style="padding-left:17px;">
+						<span class="switcher-target-duplicate_indicator_custom_field_<?php echo $entry; ?>" style="vertical-align:middle; padding-left:17px;">
 							<?php _e('Name', 'pmxi_plugin') ?>
-							<input type="text" name="custom_duplicate_name" value="<?php echo esc_attr($post['custom_duplicate_name']) ?>" /><br>
+							<input type="text" name="custom_duplicate_name" value="<?php echo esc_attr($post['custom_duplicate_name']) ?>" />
 							<?php _e('Value', 'pmxi_plugin') ?>
 							<input type="text" name="custom_duplicate_value" value="<?php echo esc_attr($post['custom_duplicate_value']) ?>" />
 						</span>
@@ -51,6 +51,20 @@
 					<input type="checkbox" id="is_keep_attachments_<?php echo $entry; ?>" name="is_keep_attachments" value="1" <?php echo $post['is_keep_attachments'] ? 'checked="checked"': '' ?> />
 					<label for="is_keep_attachments_<?php echo $entry; ?>"><?php _e('Keep attachments when records removed', 'pmxi_plugin') ?></label>
 					<a href="#help" class="help" title="<?php _e('Check this option if you want attachments like featured image to be kept in media library after parent post or page is removed or replaced during reimport operation.', 'pmxi_plugin') ?>">?</a>
+				</div>
+			</div>
+			<div class="input">
+				<input type="hidden" name="is_update_missing_cf" value="0" />
+				<input type="checkbox" id="is_update_missing_cf_<?php echo $entry; ?>" name="is_update_missing_cf" value="1" <?php echo $post['is_update_missing_cf'] ? 'checked="checked"': '' ?> class="switcher"/>
+				<label for="is_update_missing_cf_<?php echo $entry; ?>"><?php _e('Instead of Deleting Missing Records, Set Custom Field', 'pmxi_plugin') ?></label>
+				<a href="#help" class="help" title="<?php _e('Check this option if you want to update posts custom fields from the previous import operation which are not found among newly imported set.', 'pmxi_plugin') ?>">?</a>
+			</div>			
+			<div class="switcher-target-is_update_missing_cf_<?php echo $entry; ?>" style="padding-left:17px;">
+				<div class="input">
+					<?php _e('Name', 'pmxi_plugin') ?>
+					<input type="text" name="update_missing_cf_name" value="<?php echo esc_attr($post['update_missing_cf_name']) ?>" /><br>
+					<?php _e('Value', 'pmxi_plugin') ?>
+					<input type="text" name="update_missing_cf_value" value="<?php echo esc_attr($post['update_missing_cf_value']) ?>" />									
 				</div>
 			</div>
 			<div class="input">
@@ -87,15 +101,31 @@
 						<label for="is_keep_menu_order_<?php echo $entry; ?>"><?php _e('Keep menu order', 'pmxi_plugin') ?></label>
 					</div>
 					<div class="input">
+						<input type="hidden" name="is_keep_parent" value="0" />
+						<input type="checkbox" id="is_keep_parent_<?php echo $entry; ?>" name="is_keep_parent" value="1" <?php echo $post['is_keep_parent'] ? 'checked="checked"': '' ?> />
+						<label for="is_keep_parent_<?php echo $entry; ?>"><?php _e('Keep parent post', 'pmxi_plugin') ?></label>
+					</div>
+					<div class="input">
 						<input type="hidden" name="is_keep_content" value="0" />
 						<input type="checkbox" id="is_keep_content_<?php echo $entry; ?>" name="is_keep_content" value="1" <?php echo $post['is_keep_content'] ? 'checked="checked"': '' ?> />
 						<label for="is_keep_content_<?php echo $entry; ?>"><?php _e('Keep content', 'pmxi_plugin') ?></label>
 					</div>
 					<div class="input">
 						<input type="hidden" name="is_keep_categories" value="0" />
-						<input type="checkbox" id="is_keep_categories_<?php echo $entry; ?>" name="is_keep_categories" value="1" <?php echo $post['is_keep_categories'] ? 'checked="checked"': '' ?> />
+						<input type="checkbox" id="is_keep_categories_<?php echo $entry; ?>" name="is_keep_categories" value="1" class="switcher" <?php echo $post['is_keep_categories'] ? 'checked="checked"': '' ?> />
 						<label for="is_keep_categories_<?php echo $entry; ?>"><?php _e('Keep categories, tags and taxonomies', 'pmxi_plugin') ?></label>
-
+						<div class="switcher-target-is_keep_categories_<?php echo $entry; ?>" style="padding-left:17px;">
+							<div class="input" style="margin-bottom:3px;">
+								<input type="hidden" name="is_add_newest_categories" value="0" />
+								<input type="checkbox" id="is_add_newest_categories_<?php echo $entry; ?>" name="is_add_newest_categories" value="1" <?php echo $post['is_add_newest_categories'] ? 'checked="checked"': '' ?> />
+								<label for="is_add_newest_categories_<?php echo $entry; ?>" style="position:relative; top:1px;"><?php _e('Add new categories and taxonomies', 'pmxi_plugin') ?></label>
+							</div>
+						</div>
+					</div>
+					<div class="input">
+						<input type="hidden" name="is_keep_attachments_on_update" value="0" />
+						<input type="checkbox" id="is_keep_attachments_on_update_<?php echo $entry; ?>" name="is_keep_attachments_on_update" value="1" <?php echo $post['is_keep_attachments_on_update'] ? 'checked="checked"': '' ?> />
+						<label for="is_keep_attachments_on_update_<?php echo $entry; ?>"><?php _e('Keep attachments', 'pmxi_plugin') ?></label>
 					</div>
 					<div class="input">
 						<input type="hidden" name="is_keep_images" value="0" />

@@ -111,6 +111,7 @@
 		padding: 0px 0 16px 20px;
 		width: 25%;
 		min-width: 260px; 
+		position: relative;
 	}
 		.pmxi_plugin table.layout td.left > h2:first-child {
 			margin-top: -22px;
@@ -122,6 +123,18 @@
 		.pmxi_plugin.no-js table.layout td.left > h2:first-child {
 			margin-top: 0px;
 		}
+.pmxi_plugin table.layout div.left {
+	min-width: 490px;
+	width: 70%;
+	float: left;
+}
+.pmxi_plugin table.layout div.right {
+	padding: 0px 0 16px 20px;
+	width: 25%;
+	/*min-width: 260px; */
+	position: relative;
+	float: right;
+}
 /*@*/
 
 /*@+ Setting Form */
@@ -270,8 +283,9 @@
 /*@+ XML representation */
 .pmxi_plugin .tag {	
 	background-color: #fff;	
-	position: fixed;
-	width:22%;
+	position: absolute;
+	width:95%;
+	top: 0;
 	margin-top: 45px;			
 	border-top: 1px solid #DFDFDF;
 	-moz-border-radius-topleft: 4px;
@@ -534,7 +548,7 @@ table.xml table {
 .pmxi_plugin .remove-ico{
 	background: url("../img/ico-remove.png") no-repeat;
 	top:1px;
-	right:-4px;
+	right:-8px;
 	position: absolute;
 }
 
@@ -596,12 +610,15 @@ table.xml table {
 	width: 580px;
 }
 .pmxi_plugin #pmxi_tabs{
-	display: none;
+	/*display: none;*/
 	padding-bottom: 20px;
 	-moz-border-radius: 4px;
 	-khtml-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
+}
+.pmxi_plugin .pmxi_tab{
+	display: none;
 }
 .pmxi_plugin .ui-widget-header{
 	-moz-border-radius: 4px;
@@ -755,7 +772,7 @@ table.xml table {
 }
 .pmxi_plugin .post_taxonomy{	
 	margin-bottom: 15px;
-	overflow: hidden;
+	/*overflow: hidden;*/
 	padding-bottom: 15px;
 }
 .pmxi_plugin .post_taxonomy .delim{
@@ -763,7 +780,7 @@ table.xml table {
 }
 .pmxi_plugin .post_taxonomy .delim .add-new-ico{
 	float: right;
-	margin-right: 35px;
+	margin-right: 10%;
 	margin-top: 5px;
 }
 .pmxi_plugin .post_taxonomy ol.ui-sortable{
@@ -780,7 +797,7 @@ table.xml table {
 	background: url("../img/ico-remove.png") no-repeat scroll 0 0 transparent;
 	height: 16px;
 	position: absolute;
-	right: -10px;
+	right: 20px;
 	width: 16px;
 }
 .pmxi_plugin .switcher-target-is_keep_former_posts{
@@ -825,8 +842,7 @@ table.xml table {
 	float: right;
 	position: relative;
 	text-align: right;
-	top: 30px;
-	right:-18px;
+	top: 10px;	
 }
 .pmxi_plugin .back{
 	font-size: 16px;
@@ -958,8 +974,51 @@ table.xml table {
 }
 .pmxi_plugin .drag-element .widefat{
 	margin-left: 1%;
-	width: 90%;
+	width: 85%;
 }
 .pmxi_plugin .ui-tabs-hide{
 	display: none !important;
+}
+.pmxi_plugin .auto_nested{
+	float: left;
+	margin-left: 3px;
+}
+.pmxi_plugin .existing_meta_values{
+	clear: both;
+	display: block;
+	margin: 15px;
+}
+.pmxi_plugin .custom-params tr td{
+	width: 50%;
+}
+.pmxi_plugin .custom-params tr td.action{
+	width:100% !important;
+}
+.pmxi_plugin .load_options{
+	height: 0;
+	line-height: 0;
+	margin: 0;
+	padding: 0;
+	position: relative;
+	right: 10px;
+	text-align: right;
+	top: -35px;
+	width: 100%;
+}
+.pmxi_plugin .form-field textarea{
+	width:80%;
+}
+
+/* Tabs */
+.pmxi_plugin .nav-tab-wrapper{
+	display: none;
+}
+.pmxi_plugin h2.nav-tab-wrapper, h3.nav-tab-wrapper{	
+	margin-bottom: 10px;
+}
+.pmxi_plugin .nav-tab{
+	margin-right: 0px !important;
+}
+.pmxi_plugin h2 .nav-tab{
+	font-size: 18px !important;
 }

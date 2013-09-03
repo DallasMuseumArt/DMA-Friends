@@ -18,7 +18,7 @@ if (!defined('PREG_BAD_UTF8_OFFSET_ERROR'))
 /**
  * sfYamlParser parses YAML strings to convert them to PHP arrays.
  *
- * @package    symfony
+ * @subpackage    symfony
  * @subpackage yaml
  * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
  * @version    SVN: $Id: sfYamlParser.class.php 10832 2008-08-13 07:46:08Z fabien $

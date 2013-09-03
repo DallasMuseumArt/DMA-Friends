@@ -76,7 +76,7 @@ $.fn.wplupload  = function($options) {
 
 			if (r.OK) {					
 
-			} else if ('' != r.error.message) {
+			} else if (r.error != undefined && '' != r.error.message) {
 				$('#progressbar').html(r.error.message);
 			}
 			
@@ -109,7 +109,8 @@ $.fn.wplupload  = function($options) {
 function _parseJSON(r) {
 	var obj;
 	try {
-		obj = $.parseJSON(r);	
+		var matches = r.match(/{.*}/);		
+		obj = $.parseJSON(matches[0]);
 	} catch (e) {		
 		obj = { OK : 0 };	
 	}	

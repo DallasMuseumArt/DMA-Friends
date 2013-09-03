@@ -49,26 +49,21 @@ class DMA_Badge extends DMA_Base {
 		$this->post_content   = apply_filters( 'the_content', $badge->post_content);
 		$this->post_excerpt   = apply_filters( 'the_content', ( $badge->post_excerpt ? $badge->post_excerpt : wp_trim_words( $this->post_content, 25 ) ) );
 		$this->thumbnail      = get_the_post_thumbnail( $this->ID, apply_filters( 'dma_badge_image_size', 'badge-large' ) );
-		$this->icon           = get_post_meta( $this->ID, '_dma_badge_icon_id', true );
-		$this->points         = get_post_meta( $this->ID, '_dma_points', true );
-		$this->earned_items   = ( $items = $this->badgestack_achievements( $this->user_id, $this->ID ) ) ? array_reverse( $items ) : null;
+		$this->icon           = get_post_meta( $this->ID, '_thumbnail_id', true );
+		$this->points         = get_post_meta( $this->ID, '_badgeos_points', true );
+		$this->earned_items   = ( $items = badgeos_get_user_achievements( array( 'user_id' => $this->user_id, 'achievement_id' => $this->ID ) ) ) ? array_reverse( $items ) : null;
 		$this->times_earned   = $this->earned_items ? count( $this->earned_items ) : 0;
 		$this->awarded_by     = ( $this->earned_items && isset( $this->earned_items[0]->awarded_by ) ) ? $this->earned_items[0]->awarded_by : null;
-		$this->active_details = ( $this->is_user_active() ) ? dma_get_users_active_badge_details( $this->user_id, $this->ID ) : false;
+		$this->active_details = ( $this->is_user_active() ) ? badgeos_user_get_active_achievement( $this->user_id, $this->ID ) : false;
 		$this->date_started   = ( is_object( $this->active_details ) ) ? $this->active_details->date_started : 0;
 		$this->date_earned    = $this->earned_items ? $this->earned_items[0]->date_earned : null;
-		$this->expires        = get_post_meta( $this->ID, '_dma_time_restriction_date_end', true );
+		$this->expires        = get_post_meta( $this->ID, '_badgeos_time_restriction_date_end', true );
 		$this->credly_support = false;
 
 		// If we have a custom icon set, use that as the thumbnail
 		if ( $this->icon ) {
 			$this->icon_attributes	= wp_get_attachment_image_src( $this->icon, 'badge-large' );
 			$this->thumbnail		= '<img src="' . $this->icon_attributes[0] . '" width="' . $this->icon_attributes[1] . 'px" height="' . $this->icon_attributes[2] . 'px" />';
-		}
-
-		// If we're displaying an earned challenge...
-		if ( 'challenge-badge' == get_post_type( $this->ID ) ) {
-			$this->post_content = get_post_meta( $this->ID, '_dma_challenge_badge_congratulations_text', true );
 		}
 
 	}
@@ -99,8 +94,8 @@ class DMA_Badge extends DMA_Base {
 
 			// Find our required number checkins and our completed checkins
 			// Set our total to whichever amount is smaller
-			$required = absint( get_post_meta( $step->ID, '_dma_checkin_count', true ) );
-			$checkins = dma_find_relevant_checkins_for_step( $this->user_id, $step->ID );
+			$required = absint( get_post_meta( $step->ID, '_badgeos_count', true ) );
+			$checkins = dma_find_user_checkins_for_step( $this->user_id, $step->ID );
 			$total    = min( count( $checkins ), $required );
 
 			// Add our total to the completed count
@@ -153,7 +148,7 @@ class DMA_Badge extends DMA_Base {
 			          AND $wpdb->p2p.p2p_to = %d
 			          AND $wpdb->p2p.p2p_type = %s
 			",
-			'dma-step',
+			'step',
 			$this->ID,
 			'step-to-badge'
 			)
@@ -181,7 +176,7 @@ class DMA_Badge extends DMA_Base {
 		$stepscount = 0;
 
 		foreach ( $this->steps() as $step )
-			$stepscount += get_post_meta( $step->ID, '_dma_checkin_count', true );
+			$stepscount += get_post_meta( $step->ID, '_badgeos_count', true );
 
 		return $stepscount;
 	}
@@ -194,25 +189,13 @@ class DMA_Badge extends DMA_Base {
 	 */
 	public function step_output( $step_id = 0, $array_key = 0, $is_badge_complete = false ) {
 
-		// If this is a repeater step, refer back to the closest previous non-repeater step ID
-		if ( dma_is_a_repeater_step( $step_id ) ) {
-
-			$repeater_id = $step_id; // Cache our original $step_id for later
-			$steps = $this->steps();
-			while ( dma_is_a_repeater_step( $step_id ) && $array_key > 0 ) {
-				$array_key--;
-				$step_id = $steps[$array_key]->ID;
-			}
-
-		}
-
 		// Setup our step details
 		$step_title = get_the_title( $step_id );
-		$checkins = get_post_meta( $step_id, '_dma_checkin_count', true );
+		$checkins = get_post_meta( $step_id, '_badgeos_count', true );
 
 		// Setup our step progress variables
-		$completed_checkins = dma_find_relevant_checkins_for_step( $this->user_id, $step_id );
-		$total_count        = absint( get_post_meta( $step_id, '_dma_checkin_count', true ) );
+		$completed_checkins = dma_find_user_checkins_for_step( $this->user_id, $step_id );
+		$total_count        = absint( get_post_meta( $step_id, '_badgeos_count', true ) );
 		$completed_count    = min( count( $completed_checkins ), $total_count );
 		$incomplete_count   = absint( $total_count - $completed_count );
 
@@ -444,7 +427,7 @@ class DMA_Badge extends DMA_Base {
 					}
 				$output .= '</div>';
 				// send to credly button
-				// $output .= $this->send_credly();
+				$output .= $this->send_credly();
 				// Close button
 				$output .= '<a class="button secondary close-popup" href="#">'. __( 'Close', 'dma' ) .'</a>';
 			$output .= '</div><!-- .modal-right -->';
@@ -464,59 +447,51 @@ class DMA_Badge extends DMA_Base {
 	public function send_credly() {
 		$button = '';
 
-		/**
-		 * Do our conditional logic here:
-		 *
-		 * This button only appears for users
-		 * who have their master profile
-		 * setting "Send to Credly" turned off
-		 *
-		 * And this button only appears if
-		 * it has not already been sent
-		 *
-		 */
+		return '';
 
-		// Do not show if badge has already been sent
-		if ( $this->badge_sent_to_credly() )
-			return $button;
 		// Do not show if they're sending automatically
-		if ( $this->user_credly_enabled() )
+		if ( 'true' === $GLOBALS['badgeos_credly']->user_enabled )
+			return $button;
+
+		// Do not show if the badge isn't giveable
+		if ( 'true' != get_post_meta( $this->ID, '_badgeos_credly_is_giveable', true ) )
 			return $button;
 
 		$button .= '<div class="send-credly">';
-			$button .= '<a class="button credly" href="#'. $this->ID .'">'. __( 'Email me this badge', 'dma' ) .'</a>';
+			$button .= '<a class="button credly" href="#'. $this->ID .'">'. __( 'Send Badge to Credly', 'dma' ) .'</a>';
 			$button .= dma_spinner_notification( 'Sent' );
 		$button .= '</div><!-- .send-credly -->';
 
 		return $button;
 	}
 
-	public function badge_sent_to_credly() {
-		// @TODO make this work
-		return false;
-	}
-
-	public function user_credly_enabled() {
-		// @TODO make this work. maybe should be a method in the DMA_User class?
-		return false;
-	}
-
 }
 
 } // END class_exists check
 
-add_action( 'wp_ajax_credly_badge_send_handler', 'dma_credly_badge_send' );
-add_action( 'wp_ajax_nopriv_credly_badge_send_handler', 'dma_credly_badge_send' );
 /**
  * hook in our credly ajax function
  */
 function dma_credly_badge_send() {
-	// @TODO make this work. Success if sent to credly, fail otherwise
 
 	if ( ! isset( $_REQUEST['badge_id'] ) ) {
 		echo json_encode( 'Sorry, nothing found.' );
 		die();
 	}
-	echo json_encode( 'Success!' );
-	die();
+
+	$send_to_credly = $GLOBALS['badgeos_credly']->post_credly_user_badge( $_REQUEST['badge_id'] );
+
+	if ( $send_to_credly ) {
+
+		echo json_encode( 'Success!' );
+		die();
+
+	} else {
+
+		echo json_encode( 'Sorry, Send to Credly Failed.' );
+		die();
+
+	}
 }
+add_action( 'wp_ajax_credly_badge_send_handler', 'dma_credly_badge_send' );
+add_action( 'wp_ajax_nopriv_credly_badge_send_handler', 'dma_credly_badge_send' );

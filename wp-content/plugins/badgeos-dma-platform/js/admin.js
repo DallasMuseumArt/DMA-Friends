@@ -20,37 +20,29 @@ $(document).ready(function(){
 
 	// Helper function for hiding all our extra CMB fields
 	function hide_cmb_date_restriction_extras() {
-		$('label[for="_dma_time_restriction_days"]').parent().parent('tr').hide();
-		$('label[for="_dma_time_restriction_hour_begin"]').parent().parent('tr').hide();
-		$('label[for="_dma_time_restriction_hour_end"]').parent().parent('tr').hide();
-		$('label[for="_dma_time_restriction_date_begin"]').parent().parent('tr').hide();
-		$('label[for="_dma_time_restriction_date_end"]').parent().parent('tr').hide();
-		$('label[for="_dma_time_restriction_limit_checkin"]').parent().parent('tr').hide();
+		$('label[for="_badgeos_time_restriction_days"]').parent().parent('tr').hide();
+		$('label[for="_badgeos_time_restriction_hour_begin"]').parent().parent('tr').hide();
+		$('label[for="_badgeos_time_restriction_hour_end"]').parent().parent('tr').hide();
+		$('label[for="_badgeos_time_restriction_date_begin"]').parent().parent('tr').hide();
+		$('label[for="_badgeos_time_restriction_date_end"]').parent().parent('tr').hide();
+		$('label[for="_badgeos_time_restriction_limit_checkin"]').parent().parent('tr').hide();
 	}
 
 	// Show/Hide relevant date restrictions for Activities and Events
-	$("#_dma_time_restriction").change( function() {
+	$("#_badgeos_time_restriction").change( function() {
 		if ( '' === $(this).val() ) {
 			hide_cmb_date_restriction_extras();
 		} else if ( 'hours' === $(this).val() ) {
 			hide_cmb_date_restriction_extras();
-			$('label[for="_dma_time_restriction_days"]').parent().parent('tr').show();
-			$('label[for="_dma_time_restriction_hour_begin"]').parent().parent('tr').show();
-			$('label[for="_dma_time_restriction_hour_end"]').parent().parent('tr').show();
+			$('label[for="_badgeos_time_restriction_days"]').parent().parent('tr').show();
+			$('label[for="_badgeos_time_restriction_hour_begin"]').parent().parent('tr').show();
+			$('label[for="_badgeos_time_restriction_hour_end"]').parent().parent('tr').show();
 		} else if ( 'dates' === $(this).val() ) {
 			hide_cmb_date_restriction_extras();
-			$('label[for="_dma_time_restriction_date_begin"]').parent().parent('tr').show();
-			$('label[for="_dma_time_restriction_date_end"]').parent().parent('tr').show();
-			$('label[for="_dma_time_restriction_limit_checkin"]').parent().parent('tr').show();
+			$('label[for="_badgeos_time_restriction_date_begin"]').parent().parent('tr').show();
+			$('label[for="_badgeos_time_restriction_date_end"]').parent().parent('tr').show();
+			$('label[for="_badgeos_time_restriction_limit_checkin"]').parent().parent('tr').show();
 		}
-	}).change();
-
-	// Show/Hide badge Steps metabox based on badge trigger type selection
-	$("#_dma_badge_trigger_type").change( function() {
-		if ( 'steps' == $(this).val() )
-			$('#badgeos_create_steps').show();
-		else
-			$('#badgeos_create_steps').hide();
 	}).change();
 
 	// Force numerical input on reward points input

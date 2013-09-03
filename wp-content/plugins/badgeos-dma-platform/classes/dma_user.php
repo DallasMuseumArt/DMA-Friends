@@ -11,10 +11,8 @@ if ( ! class_exists( 'DMA_User' ) ) {
  *   ->edit_profile()
  *   ->save_profile()
  *   ->badge_count()
- *   ->checkin_count()
  *   ->latest_badge()
  *   ->earned_badges()
- *   ->checkins()
  *
  * @since  1.0
  * @param  int $this->user_id The ID of the user in question
@@ -46,9 +44,10 @@ class DMA_User extends DMA_Base {
 		$this->zip          = get_user_meta( $this->ID, 'zip', true );
 		$this->sms_optin    = get_user_meta( $this->ID, 'sms_optin', true ) ? true : false;
 		$this->email_optin  = get_user_meta( $this->ID, 'email_optin', true ) ? true : false;
+		// $this->credly_optin = $GLOBALS['badgeos_credly']->user_enabled;
 		$this->avatar		= dma_get_user_avatar( apply_filters( 'dma_user_avatar_args', array( 'user_id' => $this->ID ) ) );
 		$this->avatar_id    = get_user_meta( $this->ID, 'avatar', true );
-		$this->points       = dma_get_users_points( $this->ID );
+		$this->points       = badgeos_get_users_points( $this->ID );
 		$this->cache_delete = isset( $_REQUEST['delete-cache'] ) && $_REQUEST['delete-cache'] === 'true' ? true : false;
 
 	}
@@ -74,10 +73,10 @@ class DMA_User extends DMA_Base {
 		if ( $this->user_id ) {
 
 			$profile_bits = apply_filters( 'dma_profile_components', array(
-				'avatar' => $this->avatar,
-				'user_name' => '<h4 class="user-name">Hello, ' . $this->first_name . '</h4>',
+				'avatar'      => $this->avatar,
+				'user_name'   => '<h4 class="user-name">Hello, ' . $this->first_name . '</h4>',
 				'user_points' => '<div class="user-points"><span class="points">' . $this->points . '</span> <span class="label">Points</span></div>',
-				'logout' => '<a class="user-logout icon-cancel-2" href="' . wp_logout_url( site_url() ) . '">Log Out</a>',
+				'logout'      => '<a class="user-logout icon-cancel-2" href="' . wp_logout_url( site_url() ) . '">Log Out</a>',
 			) );
 			// Concatenate our output
 			$output = '';
@@ -166,13 +165,14 @@ class DMA_User extends DMA_Base {
 			$output .= apply_filters( 'dma_profile_standard_fields', '', $this->ID, $this );
 
 			// Share My Badges on Credly
-			// $output .= '<fieldset class="no-icon"><legend>Share my Badges on Credly</legend>';
-			// $output .= '<input class="toggle" type="checkbox" id="credly_optin" name="credly_optin">';
-			// $output .= '<label for="credly_optin" class="standard"><a class="help small pop credly" href="#what-is-credly" data-popheight="auto"><div class="q icon-help-circled"></div><span>What is Credly?</span></a></label></fieldset>';
-			// $output .= '<div id="what-is-credly" class="popup close">';
-			// $output .= dashboard_popup_content( 'What is Credly?' );
-			// $output .= '<a class="button secondary close-popup" href="#">Close</a>';
-			// $output .= '</div>';
+			$output .= '<fieldset class="no-icon"><legend>Share my Badges on Credly</legend>';
+			//$output .= '<input class="toggle" type="checkbox" id="credly_optin" name="credly_optin" >';
+			$output .= '<input class="toggle" type="checkbox" id="credly_optin" name="credly_optin" ' . checked( $this->credly_optin, 'true', false ) . '>';
+			$output .= '<label for="credly_optin" class="standard"><a class="help small pop credly" href="#what-is-credly" data-popheight="auto"><div class="q icon-help-circled"></div><span>What is Credly?</span></a></label></fieldset>';
+			$output .= '<div id="what-is-credly" class="popup close">';
+			$output .= dashboard_popup_content( 'What is Credly?' );
+			$output .= '<a class="button secondary close-popup" href="#">Close</a>';
+			$output .= '</div>';
 
 			// Include our extra fields
 			if ( $this->context != 'DMA' ) {
@@ -274,7 +274,7 @@ class DMA_User extends DMA_Base {
 
 		// Burn our optin settings (necessary because a "no" value is an unset checkmark, which passes nothing below)
 		dma_update_user_data( $this->ID, 'email_optin', false );
-		dma_update_user_data( $this->ID, 'credly_optin', false );
+		//dma_update_user_data( $this->ID, 'credly_optin', false );
 
 		// Loop through all our submitted data
 		foreach ( $_REQUEST as $field_name => $value ) {
@@ -295,6 +295,9 @@ class DMA_User extends DMA_Base {
 				case 'current_member_number' :
 				case 'email_optin' :
 				case 'credly_optin' :
+					$value = ( ! empty( $value ) ? 'true' : 'false' );
+					dma_update_user_data( $this->ID, 'credly_user_enable', $value );
+					break;
 				case 'street_address' :
 				case 'apt_suite' :
 				case 'city' :
@@ -329,28 +332,10 @@ class DMA_User extends DMA_Base {
 	function badge_count( $limit_in_days = 0 ) {
 
 		// If the user has earned any badges, count them, otherwise they've earned 0
-		$badge_count = ( $badges = $this->badgestack_achievements( $this->user_id, false, 'badge', $limit_in_days ) ) ? count($badges) : 0;
+		$badge_count = ( $badges = badgeos_get_user_achievements( array( 'user_id' => $this->user_id, 'achievement_type' => 'badge', 'since' => strtotime( "-{$limit_in_days} days" ) ) ) ) ? count($badges) : 0;
 
 		// Return our final count
 		return $badge_count;
-	}
-
-	/**
-	 * Get a count of a user's logged DMA checkins
-	 *
-	 * @since  1.0
-	 * @param  int    $limit_in_days  Optionally limit results to the most recent specified number of days
-	 * @param  string $term_id        A specific term_id to use for limiting results
-	 * @return string|bool            Concatenated output for all of our earned badges, or false if none
-	 */
-	function checkin_count( $limit_in_days = 0, $term_id = false ) {
-
-		// If the user has completed any challenges, count them, otherwise they've completed no challenges
-		$checkin_count = ( $checkins = $this->checkins( $limit_in_days, $term_id ) ) ? count( $checkins ) : 0;
-
-		// Return our final count
-		return $checkin_count;
-
 	}
 
 	/**
@@ -372,7 +357,7 @@ class DMA_User extends DMA_Base {
 		$latest_badge = !$this->cache_delete ? get_transient( $transkey ) : false;
 
 		// If we don't have a cached badge, grab the user's achievements
-		if ( ! $latest_badge && $earned_badges = $this->badgestack_achievements( $this->user_id, false, 'badge' ) ) {
+		if ( ! $latest_badge && $earned_badges = badgeos_get_user_achievements( array( 'user_id' => $this->user_id, 'achievement_type' => 'badge' ) ) ) {
 
 			// Use only our newest badge
 			$latest_badge = end( $earned_badges );
@@ -413,7 +398,7 @@ class DMA_User extends DMA_Base {
 			$date_earned = $badge_id = array();
 
 			// Grab all our earned fun badges
-			$earned_badges = $this->badgestack_achievements( $this->user_id, false, 'badge' );
+			$earned_badges = badgeos_get_user_achievements( array( 'user_id' => $this->user_id, 'achievement_type' => 'badge' ) );
 
 			// If we actually have any earned badges, lets drop any badges earned more than once
 			// Note: this whole process is because array_unique won't work with a multi-dimensional array
@@ -470,20 +455,6 @@ class DMA_User extends DMA_Base {
 	}
 
 	/**
-	 * Alias for dma_get_all_user_checkins(), gets a list of a user's logged DMA Cards
-	 *
-	 * @since  1.0
-	 * @param  int    $limit_in_days  Optionally limit results to the most recent specified number of days
-	 * @param  string $term_id       A specific term_id to use for limiting results
-	 * @return @return array|bool     An array of $post objects, or false if none
-	 */
-	function checkins( $limit_in_days = 0, $term_id = false ) {
-
-		return dma_get_all_user_checkins( $this->ID, $limit_in_days, $term_id );
-
-	}
-
-	/**
 	 * Generates a user's activity stream
 	 *
 	 * @since  1.0
@@ -491,101 +462,109 @@ class DMA_User extends DMA_Base {
 	 * @return mixed  String of concatenated output or null if user has no logged activities
 	 */
 	function activity_stream() {
+		global $wpdb;
 
-		// Query badgestack-log-entry and checkin post types authored by our $user_id
-		$activity_posts = get_posts( array( 'author' => $this->ID, 'post_type' => array( 'checkin', 'badgestack-log-entry' ), 'posts_per_page' => -1 ) );
+		// Assume we have nothing to output
+		$output = '';
 
-		if ( ! empty( $activity_posts ) ) {
+		// Attempt to pull back our cached activities query
+		$activities = maybe_unserialize( get_transient( "dma_user_{$this->ID}_activity_stream" ) );
 
-			// Grab related posts for checkins
-			p2p_type( 'activity-to-checkin' )->each_connected( $activity_posts, array(), 'activity' );
-			p2p_type( 'dma-event-to-checkin' )->each_connected( $activity_posts, array(), 'event' );
+		// If we have no activities, run a new query
+		if ( empty( $activities ) ) {
 
-			// If we have posts, concatenate our output
-			$output = '<div class="activity-stream">';
+			// Get the user's activity stream items
+			$activities = $wpdb->get_results(
+				$wpdb->prepare(
+					"
+					SELECT   *
+					FROM     {$wpdb->prefix}dma_activity_stream
+					WHERE    user_id = %d
+					ORDER BY ID DESC
+					",
+					$this->ID
+				)
+			);
 
-			foreach ( $activity_posts as $post ) {
+			// Store our query for the next 24hrs
+			set_transient( "dma_user_{$this->ID}_activity_stream", $activities, DAY_IN_SECONDS );
+		}
 
-				$this->post = &$post;
 
-				// Grab the post type for the post related to our entry
-				$activity_post_type = get_post_type( $post->ID );
+		// If we have activities, generate our output
+		if ( ! empty( $activities ) ) {
 
-				// If we're dealing with a log entry...
-				if ( 'badgestack-log-entry' == $activity_post_type ) {
+			$output .= '<div class="activity-stream">';
 
-					$achievement_id = get_post_meta ( $post->ID, '_badgestack_log_achievement_id', true );
-					$post_type = ( ! empty ( $achievement_id ) ? get_post_type( $achievement_id ) : '' );
+			foreach ( $activities as $activity ) {
 
-					// If we're dealing with a Badge...
-					if ( 'badge' == $post_type ) {
-
-						$earned_badge = new DMA_Badge( get_post( $achievement_id ) );
-						$title = '<a href="#badge-' . $achievement_id . '-pop" class="pop badge-' . $achievement_id . ' object-' . $achievement_id . ' earned">';
-						$title .= get_the_title( $achievement_id );
-						$title .= '</a>';
-						$title .= $earned_badge->earned_modal();
-
+				switch ( $activity->action ) {
+					case 'unlocked' :
+						$earned_badge = new DMA_Badge( get_post( $activity->object_id ) );
 						$output .= $this->build_stream_item( array(
 							'label' => __( 'You earned a badge' , 'dma' ),
-							'title' => $title,
+							'title' => sprintf(
+									'<a href="#badge-%1$d-pop" class="pop badge-%1$d object-%1$d earned">%2$s</a> %3$s',
+									$activity->object_id,
+									get_the_title( $activity->object_id ),
+									$earned_badge->earned_modal()
+								),
 							'type'  => 'badge',
 							'icon'  => 'cd',
+							'time'  => $activity->timestamp,
 						) );
-
-					// Or, if we're dealing with a Reward...
-					} elseif ( 'badgeos-rewards' == $post_type ) {
-
+						break;
+					case 'claimed-reward' :
 						$output .= $this->build_stream_item( array(
 							'label' => __( 'You claimed a reward' , 'dma' ),
-							'title' => get_the_title( $achievement_id ),
+							'title' => get_the_title( $activity->object_id ),
 							'type'  => 'reward',
 							'icon'  => 'trophy',
+							'time'  => $activity->timestamp,
 						) );
-
-					// Or, if we're dealing with a location checkin
-					} elseif ( 'dma-location' == $post_type ) {
-
+						break;
+					case 'checked-in' :
 						$output .= $this->build_stream_item( array(
 							'label' => __( 'You checked in at' , 'dma' ),
-							'title' => get_the_title( $achievement_id ),
+							'title' => get_the_title( $activity->object_id ),
 							'type'  => 'checkin',
 							'icon'  => 'location',
+							'time'  => $activity->timestamp,
 						) );
-					}
-
-				// Otherwise, we're dealing with a checkin...
-				} elseif ( 'checkin' == $activity_post_type ) {
-
-					// If the related post is an activity...
-					if ( $post->activity ) {
-
+						break;
+					case 'activity' :
 						// Handle "Liked a work of art"
-						if ( 2344 == $post->activity[0]->ID ) {
-
+						if ( 2344 == $activity->object_id ) {
 							$output .= $this->build_stream_item( array(
 								'label' => __( 'You liked a work of art' , 'dma' ),
-								'title' => __( 'Art Accession #' , 'dma' ) .' '. get_post_meta( $post->ID, '_dma_accession_id', true ),
+								'title' => sprintf( __( 'Art Accession #%s' , 'dma' ), $activity->artwork_id ),
 								'type'  => 'like',
 								'icon'  => 'heart',
+								'time'  => $activity->timestamp,
 							) );
 
 						// Otherwise, this is a normal activity
 						} else {
-							$output .= $this->build_stream_item( array( 'title' => get_the_title( $post->activity[0]->ID ) ) );
+							$output .= $this->build_stream_item( array(
+								'title' => get_the_title( $activity->object_id ),
+								'time'  => $activity->timestamp,
+							) );
 						}
-
-					// Or, if it's an Event...
-					} elseif ( $post->event ) {
+						break;
+					case 'event' :
 						$output .= $this->build_stream_item( array(
 							'label' => __( 'You checked in at' , 'dma' ),
-							'title' => get_the_title( $post->event[0]->ID ),
+							'title' => get_the_title( $activity->object_id ),
 							'type'  => 'event',
 							'icon'  => 'location',
+							'time'  => $activity->timestamp,
 						) );
-					}
-				}
-			}
+						break;
+					default :
+						break;
+				} // End switch $activity->action
+
+			} // End foreach $activities
 
 			// Manually add our user registration activity at the end
 			$output .= $this->build_stream_item( array(
@@ -596,11 +575,10 @@ class DMA_User extends DMA_Base {
 
 			$output .= '</div>';
 
-			return $output;
 		}
 
-		// If we didn't have posts return null
-		return null;
+		// Send back our final output
+		return $output;
 
 	}
 
@@ -611,7 +589,7 @@ class DMA_User extends DMA_Base {
 			'title' => '',
 			'type'  => 'activity',
 			'icon'  => 'check',
-			'time'  => $this->post->post_date,
+			'time'  => '',
 		) );
 		extract( $args );
 
@@ -629,7 +607,6 @@ class DMA_User extends DMA_Base {
 /**
  * Helper function to automatically create an DMA User and put their detials in the global space
  */
-add_action( 'init', 'dma_create_user_object' );
 function dma_create_user_object() {
 	if ( is_user_logged_in() ) {
 		$GLOBALS['dma_user'] = new DMA_User();
@@ -639,11 +616,10 @@ function dma_create_user_object() {
 		add_action( 'wp_ajax_nopriv_dma_save_user_profile', array( $GLOBALS['dma_user'], 'save_profile' ) );
 	}
 }
+add_action( 'init', 'dma_create_user_object' );
 
 // @CACHING: Adds cache-buster for 'user-' . $this->ID . '-latest_badge'
 // @CACHING: Adds cache-buster for 'user-' . $this->ID . '-earned_badges'
-add_action( 'dma_create_checkin', 'dma_user_cache_buster', 10, 2 );
-add_action( 'checkin_earned_achievements', 'dma_user_cache_buster', 10, 2 );
 function dma_user_cache_buster( $checkin_earned_achievements = false, $user_id = 0 ) {
 
 	// If we're dealing with earned achievements
@@ -664,3 +640,5 @@ function dma_user_cache_buster( $checkin_earned_achievements = false, $user_id =
 		}
 	}
 }
+add_action( 'dma_create_checkin', 'dma_user_cache_buster', 10, 2 );
+add_action( 'checkin_earned_achievements', 'dma_user_cache_buster', 10, 2 );

@@ -46,51 +46,11 @@
 					<input type="text" class="datepicker" name="date_end" value="<?php echo esc_attr($post['date_end']) ?>" />
 				</span>
 			</div>
-		</div>
-		<!--div class="col3 last">
-			<div class="input">
-				<input type="hidden" name="is_duplicates" value="0" />
-				<input type="checkbox" id="is_duplicates_<?php echo $entry; ?>" class="switcher" name="is_duplicates" value="1" <?php echo $post['is_duplicates'] ? 'checked="checked"': '' ?>/>
-				<label for="is_duplicates_<?php echo $entry; ?>"><?php _e('Check for duplicates', 'pmxi_plugin') ?> <a href="#help" class="help" title="<?php _e('This option allows you to specify action for articles being imported which have duplicates in WordPress database.<br /><br /><b>Important</b>: This option applies only to pages or posts not associated with current import. To manage overwrite rules for records previously created by import operation currently being updated please see `Reimport / Update Options` section below.', 'pmxi_plugin') ?>">?</a></label>
-				<div class="switcher-target-is_duplicates_<?php echo $entry; ?>">
-					<div class="input">
-						<span style="vertical-align:middle"><?php _e('Determine duplicates by', 'pmxi_plugin') ?></span><br>
-						<input type="radio" id="duplicate_indicator_title_<?php echo $entry; ?>" class="switcher" name="duplicate_indicator" value="title" <?php echo 'title' == $post['duplicate_indicator'] ? 'checked="checked"': '' ?>/>
-						<label for="duplicate_indicator_title_<?php echo $entry; ?>"><?php _e('title', 'pmxi_plugin' )?></label><br>
-						<input type="radio" id="duplicate_indicator_content_<?php echo $entry; ?>" class="switcher" name="duplicate_indicator" value="content" <?php echo 'content' == $post['duplicate_indicator'] ? 'checked="checked"': '' ?>/>
-						<label for="duplicate_indicator_content_<?php echo $entry; ?>"><?php _e('content', 'pmxi_plugin' )?></label><br>
-						<input type="radio" id="duplicate_indicator_custom_field_<?php echo $entry; ?>" class="switcher" name="duplicate_indicator" value="custom field" <?php echo 'custom field' == $post['duplicate_indicator'] ? 'checked="checked"': '' ?>/>
-						<label for="duplicate_indicator_custom_field_<?php echo $entry; ?>"><?php _e('custom field', 'pmxi_plugin' )?></label><br>
-						<span class="switcher-target-duplicate_indicator_custom_field_<?php echo $entry; ?>" style="vertical-align:middle">
-							<?php _e('Name', 'pmxi_plugin') ?>
-							<input type="text" name="custom_duplicate_name" value="<?php echo esc_attr($post['custom_duplicate_name']) ?>" /><br>
-							<?php _e('Value', 'pmxi_plugin') ?>
-							<input type="text" name="custom_duplicate_value" value="<?php echo esc_attr($post['custom_duplicate_value']) ?>" />
-						</span>
-					</div>
-					<div class="input">
-						<span style="vertical-align:middle"><?php _e('When found:', 'pmxi_plugin') ?></span> <br>
-						<input type="radio" id="duplicate_action_keep_<?php echo $entry; ?>" name="duplicate_action" value="keep" <?php echo 'keep' == $post['duplicate_action'] ? 'checked="checked"': '' ?> class="switcher"/>
-						<label for="duplicate_action_keep_<?php echo $entry; ?>"><?php _e('keep existing and skip new', 'pmxi_plugin' )?></label> <br>
-						<input type="radio" id="duplicate_action_rewrite_<?php echo $entry; ?>" name="duplicate_action" value="rewrite" <?php echo 'rewrite' == $post['duplicate_action'] ? 'checked="checked"': '' ?> class="switcher"/>
-						<label for="duplicate_action_rewrite_<?php echo $entry; ?>"><?php _e('remove existing and add new', 'pmxi_plugin' )?></label> <br>
-						<input type="radio" id="duplicate_action_update_<?php echo $entry; ?>" name="duplicate_action" value="update" <?php echo 'update' == $post['duplicate_action'] ? 'checked="checked"': '' ?> class="switcher"/>
-						<label for="duplicate_action_update_<?php echo $entry; ?>"><?php _e('update existing', 'pmxi_plugin' )?></label>
-						<span class="switcher-target-duplicate_action_update_<?php echo $entry; ?>" style="vertical-align:middle">
-							<div class="input" style="padding-left:20px;">
-								<input type="hidden" name="not_create_records" value="0" />
-								<input type="checkbox" id="not_create_records_<?php echo $entry; ?>" name="not_create_records" value="1" <?php echo $post['not_create_records'] ? 'checked="checked"' : '' ?> />
-								<label for="not_create_records_<?php echo $entry; ?>"><?php _e('NOT create new records', 'pmxi_plugin') ?></label>
-							</div>
-						</span>
-					</div>
-				</div>
-			</div>
-		</div-->
+		</div>	
 	</td>
 </tr>
 <tr>
 	<td colspan="3">
-		<h3 style="text-align:center; color:#999;">Drag elements from the XML tree on the right to any textbox below.</h3>
+		<h3 style="text-align:center; color:#999;"><?php _e('Drag elements from the XML tree on the right to any textbox below.','pmxi_plugin');?></h3>
 	</td>
 </tr>

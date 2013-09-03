@@ -9,43 +9,54 @@ function dma_get_available_rewards_for_user( $user_id = null ) {
 
 	$user_id = dma_get_user_id( $user_id );
 
-	//Retrieve current users points
-	$user_points = dma_get_users_points( $user_id );
+	// Attempt to pull our rewards from cache
+	$rewards_query = maybe_unserialize( get_transient( 'dma_available_rewards' ) );
 
-	//We want to show all Rewards, including those worth 4000 higher than what the user has
-	//Add 4000 points to their current total
-	$user_points = $user_points + 4000000; // increased to huge number on 1/17 per Jonathan
-	//https://webdevstudios.basecamphq.com/projects/10447885-dma/todo_items/155598999/comments#216635481
+	// If we don't have a cached query, run a fresh one
+	if ( empty( $rewards_query ) ) {
 
-	//WP_Query to retrieve all rewards available to a user
-	//Does not return hidden fields
-	//Only returns Rewards between 0 and 4000+ points over what the user has
-	$args = array(
-		'post_type'		=>	'badgeos-rewards',
-		'post_status'	=>	'publish',
-		'posts_per_page' => 1000,
-		'post_status'    => 'publish',
-		'no_found_rows'  => true,
-		'meta_query'	=>	array(
-			array(
-				'key' => '_dma_reward_hidden',
-				'value' => 'on',
-				'compare' => 'NOT EXISTS'
-			),
-			array(
-				'key' => '_dma_reward_points',
-				'value' => array( 0, absint( $user_points ) ),
-				'type'	=>	'numeric',
-				'compare' => 'BETWEEN'
+		// Show rewards up to 4,000 more points than the user has already
+		// NOTE: As of 1/17 we show ALL rewards, regardless of point cost
+		// $user_points = badgeos_get_users_points( $user_id );
+		// $user_points = absint( $user_points ) + 4000;
+
+		// Query all published, non-hidden rewards
+		// NOTE: As of 1/17 we no longer restrict based on user's points
+		$args = array(
+			'post_type'      =>	'badgeos-rewards',
+			'post_status'    =>	'publish',
+			'posts_per_page' => -1,
+			'post_status'    => 'publish',
+			'no_found_rows'  => true,
+			'meta_query'     =>	array(
+				array(
+					'key'     => '_dma_reward_hidden',
+					'value'   => 'on',
+					'compare' => 'NOT EXISTS'
+				),
+				// array(
+				// 	'key'     => '_dma_reward_points',
+				// 	'value'   => array( 0, $user_points ),
+				// 	'type'    =>	'numeric',
+				// 	'compare' => 'BETWEEN'
+				// )
 			)
-		)
-	);
+		);
+		$rewards_query = new WP_Query( $args );
 
-	$get_rewards = new WP_Query( $args );
+		// Store our rewards query for a week
+		set_transient( 'dma_available_rewards', $rewards_query, WEEK_IN_SECONDS );
+
+	}
+
+	// Double-check we're working with an array...
+	// maybe_unserialize() wasn't working on dev
+	if ( ! is_object( $rewards_query ) )
+		$rewards_query = unserialize( $rewards_query );
 
 	// Init our $rewards variable
 	$rewards = array();
-	while ( $get_rewards->have_posts() ) : $get_rewards->the_post();
+	while ( $rewards_query->have_posts() ) : $rewards_query->the_post();
 
 		global $post;
 		//verify user has prereqisite badges if any are attached to this reward
@@ -154,7 +165,7 @@ function dma_get_reward_points( $reward_id = 0 ) {
 */
 function dma_redeem_reward( $user_id = null, $reward_id = null ) {
 
-	//_badgestack_rewards
+	//_badgeos_rewards
 	$rewards = dma_get_user_rewards( $user_id );
 
 	$post_object = get_post( $reward_id );
@@ -171,22 +182,22 @@ function dma_redeem_reward( $user_id = null, $reward_id = null ) {
 	$rewards[] = apply_filters( 'reward_object', $reward_object, $user_id );
 
 	// save rewards
-	update_user_meta( $user_id, '_badgestack_rewards', $rewards );
+	update_user_meta( $user_id, '_badgeos_rewards', $rewards );
 
-	//log the Reward redemption
-	badgestack_post_log_entry( $reward_id, $user_id, 'claimed' );
+	// log the Reward redemption
+	badgeos_post_log_entry( $reward_id, $user_id, 'claimed' );
 
-	//grab the location printer details
+	// grab the location printer details
 	$location_printer_ip = get_post_meta( dma_get_current_location_id(), '_dma_location_printer_reward', true );
 
-	//action hook when a Reward is redeemed
+	// action hook when a Reward is redeemed
 	do_action( 'dma_user_claimed_reward', absint( $user_id ), absint( $reward_id ), $location_printer_ip );
 
-	//deduct user points for reward redemption
+	// deduct user points for reward redemption
 	$reward_points = dma_get_reward_points( $reward_id );
-	dma_update_users_points( $user_id, - absint( $reward_points ) );
+	badgeos_update_users_points( $user_id, - absint( $reward_points ) );
 
-	//check and deduct reward inventory if necessary
+	// check and deduct reward inventory if necessary
 	dma_deduct_reward_inventory( $reward_id );
 
 }
@@ -202,7 +213,7 @@ function dma_get_user_rewards( $user_id = 0 ) {
 	$user_id = dma_get_user_id( $user_id );
 
 	// get existing rewards for user
-	$rewards = get_user_meta( absint( $user_id ), '_badgestack_rewards', true );
+	$rewards = get_user_meta( absint( $user_id ), '_badgeos_rewards', true );
 
 	if ( ! $rewards )
 		$rewards = array();
@@ -290,7 +301,7 @@ function dma_can_user_afford_reward( $user_id, $reward_id ) {
 
 	$user_id = dma_get_user_id( $user_id );
 	$reward_points = dma_get_reward_points( absint( $reward_id ) );
-	$user_points = dma_get_users_points( $user_id );
+	$user_points = badgeos_get_users_points( $user_id );
 
 	if ( is_numeric( $reward_points ) && is_numeric( $user_points ) ) {
 
@@ -327,7 +338,7 @@ function dma_rewards_user_has_prereqs( $user_id = 0, $reward_id = 0 ) {
 		setup_postdata( $post );
 
 		//check if user has earned this badge
-		if ( dma_check_if_user_has_achievement( $user_id, get_the_ID() ) ) {
+		if ( badgeos_get_user_achievements( array( 'user_id' => $user_id, 'achievement_id' => get_the_ID() ) ) ) {
 			//user has earned this badge so keep processing
 			continue;
 		}else{
@@ -341,3 +352,20 @@ function dma_rewards_user_has_prereqs( $user_id = 0, $reward_id = 0 ) {
 	return true;
 
 }
+
+/**
+ * Cache buster to delete DMA Rewards query transient
+ *
+ * Attached to post edit/delete/restore so rewards are always accurate
+ *
+ * @since 1.0.1
+ * @param integer $post_id The ID of the given post
+ * @param object  $post    The post object
+ */
+function dma_rewards_cache_buster( $post_id ) {
+	if ( 'badgeos-rewards' == get_post_type( $post_id ) )
+		delete_transient( 'dma_available_rewards' );
+}
+add_action( 'save_post', 'dma_rewards_cache_buster' );
+add_action( 'trashed_post', 'dma_rewards_cache_buster' );
+add_action( 'untrash_post', 'dma_rewards_cache_buster' );

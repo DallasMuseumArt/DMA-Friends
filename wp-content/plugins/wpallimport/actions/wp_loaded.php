@@ -1,6 +1,6 @@
 <?php
 
-function pmxi_wp_loaded() {			
+function pmxi_wp_loaded() {				
 	
 	$start = time();
 	// scheduling import executing logic
@@ -20,7 +20,8 @@ function pmxi_wp_loaded() {
 								'triggered' => 1,
 								'imported' => 0,
 								'created' => 0,
-								'updated' => 0								
+								'updated' => 0,
+								'skipped' => 0								
 							))->save();
 						} elseif($imp->processing == 0) {
 							$imp->execute();
@@ -35,8 +36,8 @@ function pmxi_wp_loaded() {
 			if (time() - $start > 4) break; // try not to delay server response for too long (4 secs) skipping scheduled imports if any for the next hit
 		}
 	}
-	ini_set("max_input_time", PMXI_Plugin::getInstance()->getOption('max_input_time'));
-	ini_set("max_execution_time", PMXI_Plugin::getInstance()->getOption('max_execution_time'));		
+	@ini_set("max_input_time", PMXI_Plugin::getInstance()->getOption('max_input_time'));
+	@ini_set("max_execution_time", PMXI_Plugin::getInstance()->getOption('max_execution_time'));		
 
 	/* Check if cron is manualy, then execute import */
 	$cron_job_key = PMXI_Plugin::getInstance()->getOption('cron_job_key');
@@ -56,7 +57,8 @@ function pmxi_wp_loaded() {
 							'triggered' => 1,
 							'imported' => 0,
 							'created' => 0,
-							'updated' => 0							
+							'updated' => 0,
+							'skipped' => 0							
 						))->save();
 						break;
 					case 'processing':
