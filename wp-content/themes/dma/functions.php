@@ -66,10 +66,10 @@ add_action( 'wp_head', 'dma_location_info' );
 function dma_location_info() {
 
 	// Set a default location
-	$post_id = 80;
+	//$post_id = 80;
 
 	// Get the current location
-	// $post_id = &$_SESSION['location_id'];
+	$post_id = &$_SESSION['location_id'];
 
 	$post = get_post( $post_id );
 	if ( empty( $post ) )

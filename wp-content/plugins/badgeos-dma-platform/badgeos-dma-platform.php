@@ -33,7 +33,7 @@ class DMA {
 		add_action( 'init', array( $this, 'register_achievement_relationships' ) );
 
 		// If no Location ID is set, ask user to set one.
-		// add_action( 'get_header', array( $this, 'location_setup' ), 20 );
+		add_action( 'get_header', array( $this, 'location_setup' ), 20 );
 
 		// If the location has a redirect specified, redirect the user on login
 		add_filter( 'badgeos_auth_success_url', array( $this, 'location_redirect_url' ) );
