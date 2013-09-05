@@ -3,22 +3,19 @@
 add_action( 'get_header', 'dma_redirect_to_home' );
 function dma_redirect_to_home() {
 
-	// unset( $_SESSION['location_id'] );
-
 	// If the location ID is set, return to homepage
-	if ( isset( $_SESSION['location_id'] ) ) {
+	if ( dma_get_current_location_id() ) {
 		wp_redirect( site_url() );
 		exit;
 	}
 
+	// If we have POST data, and our nonce checks out
 	if (
-		!empty( $_POST )
+		isset( $_POST['location-select'] )
 		&& wp_verify_nonce( $_POST['select_location'], plugin_basename( __FILE__ ) )
-		&& isset( $_POST['location-select'] )
 	) {
-		$id = $_POST['location-select'];
-		$_SESSION['location_id'] = $id;
-
+		// Set our location ID and redirect to homepage
+		dma_set_current_location_id( $_POST['location-select'] );
 		wp_redirect( site_url() );
 		exit;
 	}

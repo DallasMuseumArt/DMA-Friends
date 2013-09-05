@@ -91,8 +91,8 @@
 
 @font-face {
   font-family: 'fontello';
-  src: url("/lib/fonts/fontello/font/fontello.eot");
-  src: url("/lib/fonts/fontello/font/fontello.eot?#iefix") format("embedded-opentype"), url("/lib/fonts/fontello/font/fontello.svg#fontello") format("svg");
+  src: url("./lib/fonts/fontello/font/fontello.eot");
+  src: url("./lib/fonts/fontello/font/fontello.eot?#iefix") format("embedded-opentype"), url("/lib/fonts/fontello/font/fontello.svg#fontello") format("svg");
   font-weight: normal;
   font-style: normal; }
 

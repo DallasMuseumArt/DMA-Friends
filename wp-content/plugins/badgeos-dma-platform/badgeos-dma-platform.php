@@ -32,12 +32,6 @@ class DMA {
 		// Register our custom P2P relationships
 		add_action( 'init', array( $this, 'register_achievement_relationships' ) );
 
-		// If no Location ID is set, ask user to set one.
-		add_action( 'get_header', array( $this, 'location_setup' ), 20 );
-
-		// If the location has a redirect specified, redirect the user on login
-		add_filter( 'badgeos_auth_success_url', array( $this, 'location_redirect_url' ) );
-
 	}
 
 	function includes() {
@@ -56,6 +50,7 @@ class DMA {
 			require_once( $this->directory_path . '/achievement-functions.php' );
 			require_once( $this->directory_path . '/activity-functions.php' );
 			require_once( $this->directory_path . '/checkin-functions.php' );
+			require_once( $this->directory_path . '/location-functions.php' );
 			require_once( $this->directory_path . '/logging-functions.php' );
 			require_once( $this->directory_path . '/misc-functions.php' );
 			require_once( $this->directory_path . '/rules-engine.php' );
@@ -172,39 +167,6 @@ class DMA {
 			);
 		}
 	}
-
-	/**
-	 * If no Location ID is set, remove all content and output our error
-	 *
-	 * @since  1.0.0
-	 * @return void
-	 */
-	function location_setup() {
-
-		// If we do NOT have a location set...
-		if ( empty( $_SESSION['location_id'] ) ) {
-			$do_redirect = apply_filters( 'dma_do_location_redirect', true ) ? true : false;
-			if ( !is_page( 'location' ) && $do_redirect ) {
-				// Redirect to the set kiosk location page
-				wp_redirect( site_url( '/location/' ) );
-				exit;
-			}
-		} else {
-			// Redirect non-logged in users to homepage
-			if ( ! is_user_logged_in() && ! is_front_page() ) { wp_redirect( site_url() ); exit; }
-		}
-	}
-
-	/**
-	 * Redirect users on login to the location's specified redirect url (or homepage if none set)
-	 *
-	 * @since  1.0.0
-	 * @return string The intended URL
-	 */
-	function location_redirect_url( $login_success_url ) {
-		return ( $redirect_url = get_post_meta( $_SESSION['location_id'], '_dma_location_redirect', true ) ) ? $redirect_url : $login_success_url;
-	}
-
 
 	/**
 	 * Check if BadgeOS is available

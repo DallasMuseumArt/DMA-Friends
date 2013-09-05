@@ -142,20 +142,6 @@ function dma_get_link( $page = '' ) {
 }
 
 /**
- * Helper function for getting the current location ID
- *
- * @since  1.0
- * @return bool|int The ID of the current location, or 0 if not set
- */
-function dma_get_current_location_id() {
-
-	if ( empty( $_SESSION ) )
-		session_start();
-
-	return isset( $_SESSION['location_id'] ) ? $_SESSION['location_id'] : 0;
-}
-
-/**
  * @DEV: If we're logged in, provide a button to delete a user's entire earnings
  */
 function dma_delete_user_meta_button( $user_id ) {
@@ -183,16 +169,14 @@ function dma_delete_user_meta() {
 		// Grab our DMA User object
 		$user_id = absint( $_POST['user_id'] );
 
-		// Loop through and delete all user's checkins
+		// Delete activity stream entries
 		$wpdb->delete( $wpdb->prefix . 'dma_activity_stream', array( 'user_id' => $user_id ), array( '%d' ) );
 
-		// Loop through and delete all user's log entries
+		// Delete log entries
 		$wpdb->delete( $wpdb->prefix . 'dma_log_entries', array( 'user_id' => $user_id ), array( '%d' ) );
 
-		// Delete user's achievements meta
-		delete_user_meta( $user_id, '_badgeos_achievements' );
-		delete_user_meta( $user_id, '_badgeos_active_achievements' );
-		delete_user_meta( $user_id, '_badgeos_points' );
+		// Delete various achievement meta
+		$wpdb->query( $wpdb->prepare( "DELETE FROM $wpdb->usermeta WHERE meta_key LIKE '_badgeos%%' AND user_id = %d", $user_id ) );
 
 	}
 }

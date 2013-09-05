@@ -46,30 +46,14 @@ function dma_disable_user_scaling() {
 	<?php
 }
 
-add_action( 'template_redirect', 'dma_start_session', 1 );
-/**
- * Start session
- */
-function dma_start_session() {
-	if ( ! isset( $_SESSION ) )
-		session_start();
-
-	// Restore our passed location ID if it's passed via querystring
-	if ( isset( $_GET['location_id'] ) && is_int( $_GET['location_id'] ) )
-		$_SESSION['location_id'] = $_GET['location_id'];
-}
-
 add_action( 'wp_head', 'dma_location_info' );
 /**
  * Set bg image per location
  */
 function dma_location_info() {
 
-	// Set a default location
-	//$post_id = 80;
-
-	// Get the current location
-	$post_id = &$_SESSION['location_id'];
+	// Get current location ID
+	$post_id = dma_get_current_location_id();
 
 	$post = get_post( $post_id );
 	if ( empty( $post ) )

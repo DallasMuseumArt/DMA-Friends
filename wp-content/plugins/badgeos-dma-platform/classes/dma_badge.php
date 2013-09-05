@@ -8,16 +8,19 @@ if ( ! class_exists( 'DMA_Badge' ) ) {
  *
  * Available Methods:
  *   ->is_user_active()
- *   ->completed_steps_count()
- *   ->steps_progress_percent()
  *   ->steps()
+ *   ->steps_count()
+ *   ->steps_completed_count()
+ *   ->steps_progress_percent()
  *   ->step_output()
  *   ->is_bookmarked()
+ *   ->thumbnail()
  *   ->details_output()
  *   ->details_badge_class()
  *   ->details_modal()
  *   ->earned_output()
  *   ->earned_modal()
+ *   ->send_credly()
  *
  * @since  1.0
  * @param  int $badge_id The ID of the badge in question
@@ -79,6 +82,48 @@ class DMA_Badge extends DMA_Base {
 	}
 
 	/**
+	 * Get all of the steps for a given challenge
+	 *
+	 * @since  1.0
+	 * @return array An array of $post objects
+	 */
+	public function steps() {
+
+		// See if we've already queried our steps
+		$steps = isset( $this->steps ) ? $this->steps : array();
+
+		// If not, build our steps array
+		if ( empty ( $steps ) ) {
+			// Grab the steps
+			$steps = badgeos_get_required_achievements_for_achievement( $this->ID );
+
+			// Setup our count data for each step
+			foreach ( $steps as $step ) {
+				$step->checkins         = dma_find_user_checkins_for_step( $this->user_id, $step->ID );
+				$step->required_count   = absint( get_post_meta( $step->ID, '_badgeos_count', true ) );
+				$step->completed_count  = min( count( $step->checkins ), $step->required_count );
+				$step->incomplete_count = absint( $step->required_count - $step->completed_count ); }
+
+			// Store our steps with the badge object
+			$this->steps = $steps;
+		}
+
+		// Return our steps, cast as an array
+		return (array) $steps;
+	}
+
+	/**
+	 * Gets a count based on the number of checkins for each step
+	 *
+	 * @since  1.0
+	 * @return integer Our total steps
+	 */
+	public function steps_count() {
+
+		return absint( array_sum( wp_list_pluck( $this->steps(), 'required_count' ) ) );
+	}
+
+	/**
 	 * Get the count for the number of steps a user has completed
 	 *
 	 * @since  1.0
@@ -86,24 +131,8 @@ class DMA_Badge extends DMA_Base {
 	 */
 	public function completed_steps_count() {
 
-		// Assume we've completed no steps
-		$completed_count = 0;
-
-		// Loop through all of our required steps
-		foreach ( $this->steps() as $step ) {
-
-			// Find our required number checkins and our completed checkins
-			// Set our total to whichever amount is smaller
-			$required = absint( get_post_meta( $step->ID, '_badgeos_count', true ) );
-			$checkins = dma_find_user_checkins_for_step( $this->user_id, $step->ID );
-			$total    = min( count( $checkins ), $required );
-
-			// Add our total to the completed count
-			$completed_count += $total;
-		}
-
 		// Return our completed count
-		return absint( $completed_count );
+		return absint( array_sum( wp_list_pluck( $this->steps(), 'completed_count' ) ) );
 
 	}
 
@@ -115,8 +144,15 @@ class DMA_Badge extends DMA_Base {
 	 */
 	public function steps_progress_percent() {
 
-		// If we don't have any steps or any completed steps, OR the badge is completed, bail here
-		if ( 0 == $this->steps_count() || 0 == $this->completed_steps_count() || $this->completed_steps_count() == $this->steps_count() )
+		// If there are no steps,
+		// OR none are completed,
+		// OR all are completed,
+		// Bail here
+		if (
+			0 == $this->steps_count()
+			|| 0 == $this->completed_steps_count()
+			|| $this->completed_steps_count() == $this->steps_count()
+		)
 			return false;
 
 		// Calculate our percent based on steps and completed steps
@@ -127,91 +163,26 @@ class DMA_Badge extends DMA_Base {
 	}
 
 	/**
-	 * Get all of the steps for a given challenge
-	 *
-	 * @since  1.0
-	 * @return array An array of $post objects
-	 */
-	public function steps() {
-
-		// Assume there are no steps
-		$steps = array();
-
-		// Grab the steps
-		global $wpdb;
-		$steps = $wpdb->get_results( $wpdb->prepare(
-			"
-			SELECT    *
-			FROM      $wpdb->posts, $wpdb->p2p
-			WHERE     $wpdb->posts.post_type = %s
-			          AND $wpdb->p2p.p2p_from = $wpdb->posts.ID
-			          AND $wpdb->p2p.p2p_to = %d
-			          AND $wpdb->p2p.p2p_type = %s
-			",
-			'step',
-			$this->ID,
-			'step-to-badge'
-			)
-		);
-
-		// Sort steps by their given order
-		foreach ( $steps as $step ) {
-			$step->order = get_step_menu_order( $step->ID );
-		}
-		uasort( $steps, 'badgeos_compare_step_order' );
-
-		// Return a re-keyed steps array (an array of $post objects)
-		return array_values( $steps );
-
-	}
-
-	/**
-	 * Gets a count based on the number of checkins for each step
-	 *
-	 * @since  1.0
-	 * @return integer Our total steps
-	 */
-	public function steps_count() {
-
-		$stepscount = 0;
-
-		foreach ( $this->steps() as $step )
-			$stepscount += get_post_meta( $step->ID, '_badgeos_count', true );
-
-		return $stepscount;
-	}
-
-	/**
 	 * Generate the short output for a given activity
 	 *
 	 * @since  1.0
 	 * @return string Our concatenated output
 	 */
-	public function step_output( $step_id = 0, $array_key = 0, $is_badge_complete = false ) {
-
-		// Setup our step details
-		$step_title = get_the_title( $step_id );
-		$checkins = get_post_meta( $step_id, '_badgeos_count', true );
-
-		// Setup our step progress variables
-		$completed_checkins = dma_find_user_checkins_for_step( $this->user_id, $step_id );
-		$total_count        = absint( get_post_meta( $step_id, '_badgeos_count', true ) );
-		$completed_count    = min( count( $completed_checkins ), $total_count );
-		$incomplete_count   = absint( $total_count - $completed_count );
+	public function step_output( $step = null ) {
 
 		// Concatenate our output
 		$output = '';
-			$output .= '<div class="step step-' . $step_id . '">';
+			$output .= '<div class="step step-' . $step->ID . '">';
 			$output .= '<div class="progress-wrap">';
-			for ( $completed_count; $completed_count > 0; $completed_count-- ) {
+			for ( $step->completed_count; $step->completed_count > 0; $step->completed_count-- ) {
 				$output .= '<span class="icon-progress checked"></span>';
 			}
-			for ( $incomplete_count; $incomplete_count > 0; $incomplete_count-- ) {
+			for ( $step->incomplete_count; $step->incomplete_count > 0; $step->incomplete_count-- ) {
 				$output .= '<span class="icon-progress"></span>';
 			}
 			$output .= '</div>';
-			$output .= '<h3 class="name">' . $step_title . '</h3>';
-		$output .= '</div><!-- .step .step-' . $step_id . ' -->';
+			$output .= '<h3 class="name">' . $step->post_title . '</h3>';
+		$output .= '</div><!-- .step .step-' . $step->ID . ' -->';
 
 		// Return our output
 		return $output;
@@ -349,8 +320,8 @@ class DMA_Badge extends DMA_Base {
 				// steps output
 				$output .= '<div class="steps">';
 					$output .= '<p>' . sprintf( _n( '%d Step', '%d Steps', $this->steps_count(), 'dma' ), $this->steps_count() ) . '</p>';
-					foreach ( $this->steps() as $array_key => $step ) {
-						$output .= $this->step_output( $step->ID, $array_key );
+					foreach ( $this->steps() as $step ) {
+						$output .= $this->step_output( $step );
 					}
 				$output .= '</div>';
 
@@ -422,8 +393,8 @@ class DMA_Badge extends DMA_Base {
 				// steps output
 				$output .= '<div class="steps">';
 					$output .='<p>' . $this->steps_count() . ' ' . __( 'Steps', 'dma' ) . '</p>';
-					foreach ( $this->steps() as $array_key => $step ) {
-						$output .= $this->step_output( $step->ID, $array_key, true );
+					foreach ( $this->steps() as $step ) {
+						$output .= $this->step_output( $step );
 					}
 				$output .= '</div>';
 				// send to credly button

@@ -147,22 +147,28 @@ function dma_user_dashboard() {
 
 					$badge_output = '';
 					$badge_output .= '<div class="badge-list">';
-					foreach ( $dma_badges as $dma_badge ) {
-						// Bail here if we cannot display this badge to the current user
-						if (
-							'triggers' !== get_post_meta( $dma_badge->ID, '_badgeos_earned_by', true ) // If it's not a step-based badge
-							|| 'hidden' == get_post_meta( $dma_badge->ID, '_badgeos_hidden', true )    // Or it's a hidden badge
-							|| dma_is_outside_date_restrictions( $dma_badge->ID )                      // Or we're outside the date restrictions
-							|| badgeos_achievement_user_exceeded_max_earnings( dma_get_user_id(), $dma_badge->ID ) // Or the user has earned it the max times
-							|| ! dma_user_has_prereq_badges( dma_get_user_id(), $dma_badge->ID )       // Or we do NOT have the prereq badges
-						)
-							continue;
+					if ( ! empty( $dma_badges ) ) {
+						foreach ( $dma_badges as $dma_badge ) {
+							// Bail here if we cannot display this badge to the current user
+							if (
+								'triggers' !== get_post_meta( $dma_badge->ID, '_badgeos_earned_by', true ) // If it's not a step-based badge
+								|| 'hidden' == get_post_meta( $dma_badge->ID, '_badgeos_hidden', true )    // Or it's a hidden badge
+								|| dma_is_outside_date_restrictions( $dma_badge->ID )                      // Or we're outside the date restrictions
+								|| badgeos_achievement_user_exceeded_max_earnings( dma_get_user_id(), $dma_badge->ID ) // Or the user has earned it the max times
+								|| ! dma_user_has_prereq_badges( dma_get_user_id(), $dma_badge->ID )       // Or we do NOT have the prereq badges
+							)
+								continue;
 
-						// Create a new badge object and concatenate our output
-						$badge = new DMA_Badge( $dma_badge );
-						$badge_output .= $badge->details_output();
-						$badge_output .= $badge->details_modal();
-					} // End foreach
+							// Create a new badge object and concatenate our output
+							$badge = new DMA_Badge( $dma_badge );
+							$badge_output .= $badge->details_output();
+							$badge_output .= $badge->details_modal();
+
+							// Output only the post title
+							// $badge_output .= '<p>' . get_the_title( $dma_badge->ID ) . '</p>';
+						} // End foreach
+					}
+
 					$badge_output .= '</div><!-- .badge-list -->';
 					echo $badge_output;
 				?>

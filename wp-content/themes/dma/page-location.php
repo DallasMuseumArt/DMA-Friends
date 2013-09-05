@@ -1,97 +1,58 @@
 <?php
 
+// Remove all the standard template features
+add_filter( 'dma_left_right_nav', '__return_null' );
+remove_all_actions( 'genesis_header' );
+
+// Redirect to home if a location ID is already set
 add_action( 'get_header', 'dma_redirect_to_home' );
 function dma_redirect_to_home() {
-
-	// unset( $_SESSION['location_id'] );
-
-	// If the location ID is set, return to homepage
-	if ( isset( $_SESSION['location_id'] ) ) {
-		wp_redirect( site_url() );
-		exit;
-	}
-
-	if (
-		!empty( $_POST )
-		&& wp_verify_nonce( $_POST['select_location'], plugin_basename( __FILE__ ) )
-		&& isset( $_POST['location-select'] )
-	) {
-		$id = $_POST['location-select'];
-		$_SESSION['location_id'] = $id;
-
+	if ( dma_get_current_location_id() ) {
 		wp_redirect( site_url() );
 		exit;
 	}
 
 }
 
-add_filter( 'dma_left_right_nav', '__return_null' );
-// remove_action( 'genesis_header', 'dma_user_profile', 8 );
-// remove_action( 'genesis_header', 'genesis_header_markup_open', 5 );
-// remove_action( 'genesis_header', 'dma_header_links' );
-// remove_action( 'genesis_header', 'genesis_header_markup_close', 15 );
-remove_all_actions( 'genesis_header' );
-
-remove_action( 'genesis_loop', 'genesis_do_loop' );
+// Add our 'location-setup' page body class
 add_filter( 'body_class', 'dma_add_login_class' );
 function dma_add_login_class( $classes ) {
-	// Add our page body class
 	$classes[] = 'location-setup';
-
 	return $classes;
 }
 
-
+// Replace the genesis loop with our location selector
+remove_action( 'genesis_loop', 'genesis_do_loop' );
 add_action( 'genesis_loop', 'dma_user_dashboard' );
-function dma_user_dashboard() {
-
-	echo '
+function dma_user_dashboard() { ?>
 	<div class="select-location-wrap info-box" >
 		<div class="dma-logo"></div>
-		';
-
-	// See if we're logged in
-	// if ( ! is_user_logged_in() ) {
-	// 	echo '<p class="select-location">'. __( 'No Locations Found!', 'dma' ). '</p>';
-	// }
-
-	$args = array(
-		'posts_per_page' => 9999,
-		'post_status' => 'publish',
-		'no_found_rows' => true,
-		'post_type' => 'dma-location',
-		'order' => 'ASC',
-		'orderby' => 'title'
-	);
-	$locations = new WP_Query( $args );
-	if ( $locations->have_posts() ) {
-		?>
-		<form method="post" name="select-location" class="select-location info" action="<?php echo site_url( '/location' ); ?>">
-			<?php wp_nonce_field( plugin_basename( __FILE__ ), 'select_location' ); ?>
+		<form method="GET" name="select-location" class="select-location info" action="">
 			<p><?php _e( 'Please select the location of this kiosk:', 'dma' ); ?></p>
-			<select name="location-select" id="location-select">
+			<select name="location_id" id="location_id">
 				<?php
-				while ( $locations->have_posts() ) : $locations->the_post();
-					global $post;
-					echo '<option value="',$post->ID,'">', the_title(), '</option>';
+					$locations = get_posts( array(
+						'posts_per_page' => -1,
+						'post_status'    => 'publish',
+						'no_found_rows'  => true,
+						'post_type'      => 'dma-location',
+						'order'          => 'ASC',
+						'orderby'        => 'title'
+					) );
 
-				endwhile;
-				// Reset Post Data
-				wp_reset_postdata();
+					if ( ! empty( $locations ) ) {
+						foreach ( $locations as $location ) {
+							echo '<option value="' . $location->ID,'">' . $location->post_title . '</option>';
+						}
+					} else {
+						echo '<option value="">No locations found.</option>';
+					}
 				?>
 			</select>
 			<button type="submit" id="Submit" name="Submit" class="alternate"><?php _e( 'Set Location', 'dma' ); ?></button>
 		</form>
-		<?php
-
-
-	} else {
-		?>
-		<p class="select-location">Please find a staff person to initilize this kiosk.</p>
-		<?php
-	}
-	echo '</div><!-- .select-location-wrap -->';
-
+	</div><!-- .select-location-wrap -->
+<?php
 }
 
 genesis();
