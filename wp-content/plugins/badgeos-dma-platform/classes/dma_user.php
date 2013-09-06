@@ -500,19 +500,21 @@ class DMA_User extends DMA_Base {
 
 				switch ( $activity->action ) {
 					case 'unlocked' :
-						$earned_badge = new DMA_Badge( get_post( $activity->object_id ) );
-						$output .= $this->build_stream_item( array(
-							'label' => __( 'You earned a badge' , 'dma' ),
-							'title' => sprintf(
-									'<a href="#badge-%1$d-pop" class="pop badge-%1$d object-%1$d earned">%2$s</a> %3$s',
-									$activity->object_id,
-									get_the_title( $activity->object_id ),
-									$earned_badge->earned_modal()
-								),
-							'type'  => 'badge',
-							'icon'  => 'cd',
-							'time'  => $activity->timestamp,
-						) );
+						if ( 'badge' == get_post_type( $activity->object_id ) ) {
+							$earned_badge = new DMA_Badge( get_post( $activity->object_id ) );
+							$output .= $this->build_stream_item( array(
+								'label' => __( 'You earned a badge' , 'dma' ),
+								'title' => sprintf(
+										'<a href="#badge-%1$d-pop" class="pop badge-%1$d object-%1$d earned">%2$s</a> %3$s',
+										$activity->object_id,
+										get_the_title( $activity->object_id ),
+										$earned_badge->earned_modal()
+									),
+								'type'  => 'badge',
+								'icon'  => 'cd',
+								'time'  => $activity->timestamp,
+							) );
+						}
 						break;
 					case 'claimed-reward' :
 						$output .= $this->build_stream_item( array(
