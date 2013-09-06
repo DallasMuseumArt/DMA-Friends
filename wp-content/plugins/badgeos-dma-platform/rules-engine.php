@@ -124,6 +124,10 @@ function dma_user_has_access_to_badge( $return = true, $user_id = 0, $badge_id =
 	if ( ! dma_user_has_prereq_badges( $user_id, $badge_id ) )
 		$return = false;
 
+	// If badge is admin-awarded only, no access
+	if ( 'admin' == get_post_meta( $badge_id, '_badgeos_earned_by', true ) )
+		$return = false;
+
 	return $return;
 }
 add_filter( 'user_has_access_to_achievement', 'dma_user_has_access_to_badge', 10, 3 );
@@ -309,14 +313,16 @@ function dma_maybe_award_custom_badge_triggers( $user_id ) {
 		SELECT post_id as ID
 		FROM   $wpdb->postmeta
 		WHERE  meta_key = '_badgeos_earned_by'
-		       AND meta_value != 'steps'
+		       AND meta_value IN ('registered','provided_email','connected_social','allowed_texting','completed_profile')
 		"
 	);
 
 	// Loop through each found badge and attemp to award
-	foreach ( $badges as $badge )
-		badgeos_maybe_award_achievement_to_user( $badge->ID, $user_id );
-
+	if ( is_array( $badges ) && ! empty( $badges) ) {
+		foreach ( $badges as $badge ) {
+			badgeos_maybe_award_achievement_to_user( $badge->ID, $user_id );
+		}
+	}
 }
 add_action( 'personal_options_update', 'dma_maybe_award_custom_badge_triggers' );
 add_action( 'edit_user_profile_update', 'dma_maybe_award_custom_badge_triggers' );
