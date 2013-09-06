@@ -9,27 +9,24 @@
  */
 function dma_set_current_location_id( $location_id = 0 ) {
 
-	// Use the WP_Session class if available
+	// Start a new session if one isn't set
+	if ( empty( $_SESSION ) )
+		session_start();
+
+	// Set the passed ID to our current location ID
+	$_SESSION['location_id'] = absint( $location_id );
+
+	// Fallback: Use the WP_Session class if available
 	if ( class_exists( 'WP_Session' ) ) {
 
 		// Store the location ID within our session data
 		$wp_session = WP_Session::get_instance();
 		$wp_session['location_id'] = absint( $location_id );
 
-		// Return the stored session ID
-		return $wp_session['location_id'];
-
-	} else {
-		// Start a new session if one isn't set
-		if ( empty( $_SESSION ) )
-			session_start();
-
-		// Set the passed ID to our current location ID
-		$_SESSION['location_id'] = absint( $location_id );
-
-		// Return the stored session ID
-		return $_SESSION['location_id'];
 	}
+
+	// Return the stored session ID
+	return $_SESSION['location_id'];
 
 }
 
@@ -41,21 +38,25 @@ function dma_set_current_location_id( $location_id = 0 ) {
  */
 function dma_get_current_location_id() {
 
-	// Use the WP_Session class if available
+	// Start a new session if one isn't set
+	if ( empty( $_SESSION ) )
+		session_start();
+
+	// Fallback: Use the WP_Session class if available
 	if ( class_exists( 'WP_Session' ) ) {
-		// Get the WP_Session data
 		$wp_session = WP_Session::get_instance();
-
-		// Return our location ID if set, or 0 if not
-		return isset( $wp_session['location_id'] ) ? $wp_session['location_id'] : 0;
-	} else {
-		// Start a new session if one isn't set
-		if ( empty( $_SESSION ) )
-			session_start();
-
-		// Return our location ID if set, or 0 if not
-		return isset( $_SESSION['location_id'] ) ? $_SESSION['location_id'] : 0;
 	}
+
+	// Attempt to pull our location ID from $_SESSION first, then $wp_session
+	if ( isset( $_SESSION['location_id'] ) )
+		$location_id = $_SESSION['location_id'];
+	elseif ( isset( $wp_session['location_id'] ) )
+		$location_id = $wp_session['location_id'];
+	else
+		$location_id = 0;
+
+	// Return our location ID if set, or 0 if not
+	return $location_id;
 }
 
 /**

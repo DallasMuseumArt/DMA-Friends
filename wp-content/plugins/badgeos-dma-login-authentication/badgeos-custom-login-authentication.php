@@ -38,6 +38,26 @@ class BadgeOS_Custom_Authentication {
 	}
 
 	/**
+	 * Determine if current user's IP is whitelisted
+	 *
+	 * @since  1.0
+	 * @return boolean True if user's IP address is inside our specified range, false otherwise
+	 */
+	function is_ip_whitelisted() {
+
+		// Setup our IP range
+		$range_start = ip2long( apply_filters( 'dma_iprange_start',  '66.195.106.0' ) );
+		$range_end   = ip2long( apply_filters( 'dma_iprange_end',    '66.195.106.255' ) );
+		$ip          = ip2long( apply_filters( 'dma_current_user_ip', $_SERVER['REMOTE_ADDR'] ) );
+
+		// If we're inside the range
+		if ($ip >= $range_start && $ip <= $range_end)
+			return true;
+		else
+			return false;
+	}
+
+	/**
 	 * Listens for a login attempt via querystring
 	 *
 	 * @since 1.0
@@ -146,7 +166,7 @@ class BadgeOS_Custom_Authentication {
 	 */
 	public function authentication_filter( $user, $username, $password ) {
 
-		if ( isset( $_GET['authenticate'] ) && true == $_GET['authenticate'] ) {
+		if ( $this->is_ip_whitelisted() && isset( $_GET['authenticate'] ) && true == $_GET['authenticate'] ) {
 			$userdata = get_user_by('login', $username );
 			if ( $userdata )
 				$user =  new WP_User($userdata->ID);
