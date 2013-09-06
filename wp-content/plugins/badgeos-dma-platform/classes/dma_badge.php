@@ -98,14 +98,18 @@ class DMA_Badge extends DMA_Base {
 			$steps = badgeos_get_required_achievements_for_achievement( $this->ID );
 
 			// Setup our count data for each step
-			foreach ( $steps as $step ) {
-				$step->checkins         = dma_find_user_checkins_for_step( $this->user_id, $step->ID );
-				$step->required_count   = absint( get_post_meta( $step->ID, '_badgeos_count', true ) );
-				$step->completed_count  = min( count( $step->checkins ), $step->required_count );
-				$step->incomplete_count = absint( $step->required_count - $step->completed_count ); }
+			if ( is_array( $steps ) && ! empty( $steps ) ) {
+				foreach ( $steps as $step ) {
+					$step->checkins         = dma_find_user_checkins_for_step( $this->user_id, $step->ID );
+					$step->required_count   = absint( get_post_meta( $step->ID, '_badgeos_count', true ) );
+					$step->completed_count  = min( count( $step->checkins ), $step->required_count );
+					$step->incomplete_count = absint( $step->required_count - $step->completed_count );
+				}
 
-			// Store our steps with the badge object
-			$this->steps = $steps;
+				// Store our steps with the badge object
+				$this->steps = $steps;
+			}
+
 		}
 
 		// Return our steps, cast as an array
@@ -320,8 +324,10 @@ class DMA_Badge extends DMA_Base {
 				// steps output
 				$output .= '<div class="steps">';
 					$output .= '<p>' . sprintf( _n( '%d Step', '%d Steps', $this->steps_count(), 'dma' ), $this->steps_count() ) . '</p>';
-					foreach ( $this->steps() as $step ) {
-						$output .= $this->step_output( $step );
+					if ( $this->steps_count() ) {
+						foreach ( $this->steps() as $step ) {
+							$output .= $this->step_output( $step );
+						}
 					}
 				$output .= '</div>';
 
@@ -393,8 +399,10 @@ class DMA_Badge extends DMA_Base {
 				// steps output
 				$output .= '<div class="steps">';
 					$output .='<p>' . $this->steps_count() . ' ' . __( 'Steps', 'dma' ) . '</p>';
-					foreach ( $this->steps() as $step ) {
-						$output .= $this->step_output( $step );
+					if ( $this->steps_count() ) {
+						foreach ( $this->steps() as $step ) {
+							$output .= $this->step_output( $step );
+						}
 					}
 				$output .= '</div>';
 				// send to credly button
