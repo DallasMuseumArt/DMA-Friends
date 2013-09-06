@@ -71,27 +71,26 @@ function dma_is_activity_locked_for_user( $user_id, $activity_id = 0 ) {
 	if ( $lockout_limit = get_post_meta( $activity_id, '_badgeos_activity_lockout', true ) ) {
 
 		// Set a timestamp for the current time minus lockout (in minutes)
-		$since = date( 'Y-m-d H:i:s', time() - ( absint( $lockout_limit ) * 60 ) );
+		$since = time() - ( absint( $lockout_limit ) * 60 );
 
 		global $wpdb;
 
 		// Get posts connected to this activity id, created by this user, since our lockout limit
-		$activities_logged = $wpdb->get_results( $wpdb->prepare(
-			"
-			SELECT    *
-			FROM      $wpdb->posts as posts,
-			          $wpdb->p2p as p2p
-			WHERE     posts.post_author    = %d
-			          AND posts.post_type  = 'checkin'
-			          AND p2p.p2p_type     = 'activity-to-checkin'
-			          AND p2p.p2p_from     = %d
-			          AND p2p.p2p_to       = posts.ID
-			          AND posts.post_date  > %s
-			",
-			$user_id,
-			$activity_id,
-			$since
-		));
+		$activities_logged = $wpdb->get_results(
+			$wpdb->prepare(
+				"
+				SELECT *
+				FROM   {$wpdb->prefix}dma_activity_stream
+				WHERE  action = 'activity'
+				       AND user_id = %d
+				       AND object_id = %d
+				       AND timestamp >= %s
+				",
+				$user_id,
+				$activity_id,
+				gmdate( 'Y-m-d H:i:s', $since )
+			)
+		);
 
 		// If we have any posts, the user is locked out
 		if ( $activities_logged )
