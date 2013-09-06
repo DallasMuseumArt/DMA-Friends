@@ -377,7 +377,8 @@ function dma_update_user_data( $user_id = 0, $type, $data ) {
 				$data = '@' . $data;
 			// Make sure our username uses only valid characters, and doesn't exceed 15 characters total.
 			preg_match( '/^@([A-Za-z0-9_]{1,15})/', $data, $sanitized_twitter );
-			return update_user_meta( $user_id, $type, strtolower( $sanitized_twitter[0] ) );
+			$handle = isset( $sanitized_twitter[0] ) ? strtolower( $sanitized_twitter[0] ) : '';
+			return update_user_meta( $user_id, $type, $handle );
 			break;
 
 		// Standard text sanitization

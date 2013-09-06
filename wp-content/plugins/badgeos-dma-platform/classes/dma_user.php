@@ -44,7 +44,7 @@ class DMA_User extends DMA_Base {
 		$this->zip          = get_user_meta( $this->ID, 'zip', true );
 		$this->sms_optin    = get_user_meta( $this->ID, 'sms_optin', true ) ? true : false;
 		$this->email_optin  = get_user_meta( $this->ID, 'email_optin', true ) ? true : false;
-		// $this->credly_optin = $GLOBALS['badgeos_credly']->user_enabled;
+		$this->credly_optin = $GLOBALS['badgeos_credly']->user_enabled;
 		$this->avatar		= dma_get_user_avatar( apply_filters( 'dma_user_avatar_args', array( 'user_id' => $this->ID ) ) );
 		$this->avatar_id    = get_user_meta( $this->ID, 'avatar', true );
 		$this->points       = badgeos_get_users_points( $this->ID );
@@ -166,8 +166,7 @@ class DMA_User extends DMA_Base {
 
 			// Share My Badges on Credly
 			$output .= '<fieldset class="no-icon"><legend>Share my Badges on Credly</legend>';
-			//$output .= '<input class="toggle" type="checkbox" id="credly_optin" name="credly_optin" >';
-			$output .= '<input class="toggle" type="checkbox" id="credly_optin" name="credly_optin" ' . checked( $this->credly_optin, 'true', false ) . '>';
+			$output .= '<input class="toggle" type="checkbox" id="credly_user_enable" name="credly_user_enable" ' . checked( $this->credly_optin, 'true', false ) . '>';
 			$output .= '<label for="credly_optin" class="standard"><a class="help small pop credly" href="#what-is-credly" data-popheight="auto"><div class="q icon-help-circled"></div><span>What is Credly?</span></a></label></fieldset>';
 			$output .= '<div id="what-is-credly" class="popup close">';
 			$output .= dashboard_popup_content( 'What is Credly?' );
@@ -274,7 +273,7 @@ class DMA_User extends DMA_Base {
 
 		// Burn our optin settings (necessary because a "no" value is an unset checkmark, which passes nothing below)
 		dma_update_user_data( $this->ID, 'email_optin', false );
-		//dma_update_user_data( $this->ID, 'credly_optin', false );
+		dma_update_user_data( $this->ID, 'credly_user_enable', 'false' );
 
 		// Loop through all our submitted data
 		foreach ( $_REQUEST as $field_name => $value ) {
@@ -285,29 +284,12 @@ class DMA_User extends DMA_Base {
 
 			// Update only our allowed fields
 			switch ( $field_name ) {
-				case 'avatar' :
-				case 'first_name' :
-				case 'last_name' :
-				case 'pin' :
-				case 'user_email' :
-				case 'phone' :
-				case 'twitter' :
-				case 'current_member_number' :
 				case 'email_optin' :
-				case 'credly_optin' :
+				case 'credly_user_enable' :
 					$value = ( ! empty( $value ) ? 'true' : 'false' );
-					dma_update_user_data( $this->ID, 'credly_user_enable', $value );
-					break;
-				case 'street_address' :
-				case 'apt_suite' :
-				case 'city' :
-				case 'state' :
-				case 'zip' :
-				case 'home_phone' :
+				default:
 					dma_update_user_data( $this->ID, $field_name, $value );
 					break;
-				default:
-					continue;
 			}
 		}
 
@@ -318,8 +300,7 @@ class DMA_User extends DMA_Base {
 		$GLOBALS['dma_user'] = new DMA_User( $this->ID );
 
 		// Send back our data and bail
-		echo json_encode( $_REQUEST );
-		die();
+		wp_send_json_success( $_REQUEST );
 	}
 
 	/**
