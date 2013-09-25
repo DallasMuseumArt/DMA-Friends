@@ -63,7 +63,6 @@ function dma_user_dashboard() {
 		<?php
 
 		$title = 'How do I claim rewards?';
-		$child_slug = 'how-to-claim-portal';
 		// Get main page (DMA iPad page)
 		$parent = get_page_by_title( $title );
 		if ( !$parent )
@@ -71,8 +70,8 @@ function dma_user_dashboard() {
 		// Then get that page's child version (for DMA Portal)
 		dashboard_popup_content( $title, true, true, array(
 			'post_title' => $title,
-			'usepath' => $parent->post_name.'/'.$child_slug,
-			'post_name' => $child_slug,
+			'usepath' => $parent->post_name,
+			'post_name' => $parent->post_name,
 			'post_parent' => $parent->ID,
 		) );
 		?>
