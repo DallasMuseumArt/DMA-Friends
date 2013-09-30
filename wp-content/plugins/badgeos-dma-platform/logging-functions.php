@@ -111,7 +111,13 @@ function dma_insert_activity_stream_entry( $args = array() ) {
 	// Insert our stream item
 	return $wpdb->insert(
 		$wpdb->prefix . 'dma_activity_stream',
-		$args,
+		array(
+			'user_id'    => $args['user_id'],
+			'object_id'  => $args['object_id'],
+			'action'     => $args['action'],
+			'artwork_id' => $args['artwork_id'],
+			'timestamp'  => $args['timestamp'],
+		),
 		array(
 			'%d', // user_id
 			'%d', // object_id
@@ -149,7 +155,17 @@ function dma_insert_log_entry( $args = array() ) {
 	// Insert our stream item
 	return $wpdb->insert(
 		$wpdb->prefix . 'dma_log_entries',
-		$args,
+		array(
+			'user_id'        => $args['user_id'],
+			'object_id'      => $args['object_id'],
+			'action'         => $args['action'],
+			'title'          => $args['title'],
+			'artwork_id'     => $args['artwork_id'],
+			'awarded_points' => $args['awarded_points'],
+			'total_points'   => $args['total_points'],
+			'admin_id'       => $args['admin_id'],
+			'timestamp'      => $args['timestamp'],
+		),
 		array(
 			'%d', // user_id
 			'%d', // object_id
@@ -163,3 +179,4 @@ function dma_insert_log_entry( $args = array() ) {
 		)
 	);
 }
+
