@@ -369,3 +369,14 @@ function dma_rewards_cache_buster( $post_id ) {
 add_action( 'save_post', 'dma_rewards_cache_buster' );
 add_action( 'trashed_post', 'dma_rewards_cache_buster' );
 add_action( 'untrash_post', 'dma_rewards_cache_buster' );
+
+/**
+ * Cache buster to delete a user's activity stream cache
+ *
+ * @since  2.0.0
+ * @param  integer   $user_id The given user's ID
+ */
+function dma_reward_bust_activity_cache( $user_id = 0 ) {
+	delete_transient( "dma_user_{$user_id}_activity_stream" );
+}
+add_action( 'dma_user_claimed_reward', 'dma_reward_bust_activity_cache' );
