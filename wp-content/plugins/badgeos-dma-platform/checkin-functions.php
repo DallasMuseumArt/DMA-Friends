@@ -50,22 +50,13 @@ function dma_create_checkin( $user_id = 0, $activity_id = 0, $date = NULL, $loca
 	// set our artwork_id based on the accession code
 	$artwork_id = ( 2344 == $activity_id ) ? $accession_id : null;
 
-	// Create a new activity stream entry for this check-in
-	$checked_in = dma_insert_activity_stream_entry( array(
-		'user_id'    => absint( $user_id ),
-		'object_id'  => absint( $activity_id ),
-		'action'     => 'activity',
-		'artwork_id' => esc_html( $checked_in ),
-		'timestamp'  => $date
-	) );
-
-	// Create a new log entry for this check-in
-	dma_insert_log_entry( array(
+	// Log this check-in
+	$checked_in = dma_post_log_entry( null, array(
 		'user_id'    => absint( $user_id ),
 		'object_id'  => absint( $activity_id ),
 		'action'     => 'activity',
 		'title'      => "{$user_id} just checked-in using code {$accession_id}",
-		'artwork_id' => esc_html( $checked_in ),
+		'artwork_id' => esc_html( $artwork_id ),
 		'timestamp'  => $date
 	) );
 
