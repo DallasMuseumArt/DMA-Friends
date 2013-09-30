@@ -309,6 +309,6 @@ add_action( 'user_authenticated', 'dma_award_activities_on_login' );
  * @param integer $user_id    The given user's ID
  */
 function dma_activity_bust_cache(  $checkin_id = 0, $user_id = 0 ) {
-	delete_transient( 'dma_user_{$user_id}_activity_stream' );
+	delete_transient( "dma_user_{$user_id}_activity_stream" );
 }
 add_action( 'dma_create_checkin', 'dma_activity_bust_cache', 10, 2 );
