@@ -503,7 +503,7 @@ class DMA_Migration extends WP_CLI_Command {
 			"
 			SELECT *
 			FROM   {$wpdb->prefix}dma_log_entries
-			WHERE  'action' = 'claimed'
+			WHERE  'action' = 'claimed-reward'
 			"
 		);
 		$count = 0;
@@ -520,7 +520,7 @@ class DMA_Migration extends WP_CLI_Command {
 					array(
 						'user_id'    => $entry->user_id,
 						'object_id'  => $entry->object_id,
-						'action'     => 'claimed-reward',
+						'action'     => $entry->action,
 						'artwork_id' => $entry->artwork_id,
 						'timestamp'  => $entry->timestamp
 					),
@@ -538,32 +538,6 @@ class DMA_Migration extends WP_CLI_Command {
 		}
 		$import_progress->finish();
 		WP_CLI::line( $count .' Reward entries imported.' );
-	}
-
-	/**
-	 * Update rewards to be listed as 'claimed-rewards' in database
-	 *
-	 * @since  1.0.0
-	 */
-	function update_claimed_rewards() {
-		global $wpdb;
-
-		WP_CLI::line( 'Reward Updater started.' );
-
-		$wpdb->update(
-			$wpdb->prefix . 'dma_log_entries',
-			array( 'action' => 'claimed-reward' ),
-			array( 'action' => 'claimed' )
-		);
-
-		$wpdb->update(
-			$wpdb->prefix . 'dma_activity_stream',
-			array( 'action' => 'claimed-reward' ),
-			array( 'action' => 'claimed' )
-		);
-
-		WP_CLI::line( 'Reward Updater finished.' );
-
 	}
 
 }
