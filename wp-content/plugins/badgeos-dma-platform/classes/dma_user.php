@@ -461,7 +461,7 @@ class DMA_User extends DMA_Base {
 					SELECT   *
 					FROM     {$wpdb->prefix}dma_activity_stream
 					WHERE    user_id = %d
-					ORDER BY ID DESC
+					ORDER BY timestamp DESC
 					",
 					$this->ID
 				)
