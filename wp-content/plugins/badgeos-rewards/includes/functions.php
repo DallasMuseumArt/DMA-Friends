@@ -185,7 +185,7 @@ function dma_redeem_reward( $user_id = null, $reward_id = null ) {
 	update_user_meta( $user_id, '_badgeos_rewards', $rewards );
 
 	// log the Reward redemption
-	badgeos_post_log_entry( $reward_id, $user_id, 'claimed' );
+	badgeos_post_log_entry( $reward_id, $user_id, 'claimed-reward' );
 
 	// grab the location printer details
 	$location_printer_ip = get_post_meta( dma_get_current_location_id(), '_dma_location_printer_reward', true );
