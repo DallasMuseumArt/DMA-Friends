@@ -31,21 +31,12 @@ function dma_post_log_entry( $log_entry_id, $args ) {
 		$args['title']     = ! empty( $title ) ? $title : "{$user->user_login} {$args['action']} the \"{$achievement->post_title}\" {$achievement_type}";
 	}
 
-	// Setup our custom table params
-	$table_params = array(
-		'user_id'    => $args['user_id'],
-		'object_id'  => $args['object_id'],
-		'action'     => $args['action'],
-		'title'      => $args['title'],
-	);
-
 	// Insert our custom log entry
-	$log_entry_id = dma_insert_log_entry( $table_params );
+	$log_entry_id = dma_insert_log_entry( $args );
 
 	// Insert a custom activity stream entry
 	if ( in_array( $args['action'], array( 'activity', 'checked-in', 'claimed-reward', 'event', 'unlocked' ) ) ) {
-		unset( $table_params['title'] );
-		dma_insert_activity_stream_entry( $table_params );
+		dma_insert_activity_stream_entry( $args );
 	}
 
 	return $log_entry_id;
@@ -179,4 +170,3 @@ function dma_insert_log_entry( $args = array() ) {
 		)
 	);
 }
-
