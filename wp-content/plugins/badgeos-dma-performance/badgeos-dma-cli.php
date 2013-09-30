@@ -467,17 +467,102 @@ class DMA_Migration extends WP_CLI_Command {
 		WP_CLI::line( 'Time elapsed: ' . gmdate( 'H:i:s', ( time() - $start_time ) ) );
 	}
 
-	function clear_achievements() {
+	/**
+	 * Delete all achievement data for a given user
+	 *
+	 * e.g. wp dma clear_achievements -user_id=4
+	 * @since  1.0.0
+	 */
+	function clear_achievements( $args, $assoc_args ) {
 		global $wpdb;
 
-		$stream_count = $wpdb->query( "DELETE FROM {$wpdb->prefix}dma_activity_stream WHERE user_id = 4");
+		$user_id = absint( $assoc_args['user_id'] );
+
+		$stream_count = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}dma_activity_stream WHERE user_id = %d", $user_id ) );
 		WP_CLI::line( $stream_count . ' stream entries deleted.' );
 
-		$log_count = $wpdb->query( "DELETE FROM {$wpdb->prefix}dma_log_entries WHERE user_id = 4");
+		$log_count = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}dma_log_entries WHERE user_id = %d", $user_id ) );
 		WP_CLI::line( $log_count . ' log entries deleted.' );
 
-		$badgestack_count = $wpdb->query( "DELETE FROM $wpdb->usermeta WHERE meta_key LIKE '_badgeos%%' AND user_id = 4");
+		$badgestack_count = $wpdb->query( $wpdb->prepare( "DELETE FROM $wpdb->usermeta WHERE meta_key LIKE '_badgeos%%' AND user_id = %d", $user_id ) );
 		WP_CLI::line( $badgestack_count . ' meta entries deleted.' );
+
+	}
+
+	/**
+	 * Import reward log entires to the activity stream
+	 *
+	 * @since  1.0.0
+	 */
+	function import_claimed_rewards() {
+		global $wpdb;
+
+		WP_CLI::line( 'Reward Migrator started.' );
+
+		$entries = $wpdb->get_results(
+			"
+			SELECT *
+			FROM   {$wpdb->prefix}dma_log_entries
+			WHERE  'action' = 'claimed'
+			"
+		);
+		$count = 0;
+		$found = count( $entries );
+
+		WP_CLI::line( 'Reward Migrator found ' . $found . ' entries.' );
+
+		$import_progress = \WP_CLI\Utils\make_progress_bar( 'Importing ' . $found . ' entries into Activity Stream.', $found );
+		foreach ( $entries as $entry ) {
+			// Only import the item if its relevant to the activity stream
+			if ( in_array( $entry->action, array( 'activity', 'checked-in', 'claimed-reward', 'event', 'unlocked' ) ) ) {
+				$wpdb->insert(
+					$wpdb->prefix . 'dma_activity_stream',
+					array(
+						'user_id'    => $entry->user_id,
+						'object_id'  => $entry->object_id,
+						'action'     => 'claimed-reward',
+						'artwork_id' => $entry->artwork_id,
+						'timestamp'  => $entry->timestamp
+					),
+					array(
+						'%d', // user_id
+						'%d', // object_id
+						'%s', // action
+						'%s', // artwork_id
+						'%s', // timestamp
+					)
+				);
+				$count++;
+			}
+			$import_progress->tick();
+		}
+		$import_progress->finish();
+		WP_CLI::line( $count .' Reward entries imported.' );
+	}
+
+	/**
+	 * Update rewards to be listed as 'claimed-rewards' in database
+	 *
+	 * @since  1.0.0
+	 */
+	function update_claimed_rewards() {
+		global $wpdb;
+
+		WP_CLI::line( 'Reward Updater started.' );
+
+		$wpdb->update(
+			$wpdb->prefix . 'dma_log_entries',
+			array( 'action' => 'claimed-reward' ),
+			array( 'action' => 'claimed' )
+		);
+
+		$wpdb->update(
+			$wpdb->prefix . 'dma_activity_stream',
+			array( 'action' => 'claimed-reward' ),
+			array( 'action' => 'claimed' )
+		);
+
+		WP_CLI::line( 'Reward Updater finished.' );
 
 	}
 
