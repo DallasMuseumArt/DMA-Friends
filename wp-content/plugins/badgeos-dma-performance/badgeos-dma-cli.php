@@ -28,7 +28,9 @@ class DMA_Migration extends WP_CLI_Command {
 
 		WP_CLI::line( 'Migration complete! ' . date( 'h:i:sa' ) );
 		WP_CLI::line( 'Time elapsed: ' . gmdate( 'H:i:s', ( time() - $start_time ) ) );
-		WP_CLI::line( 'Be sure to run "wp dma data_cleanup" to remove the now defunct data.' );
+
+		if ( empty( $assoc_args['cleanup'] ) )
+			WP_CLI::line( 'Be sure to run "wp dma data_cleanup" to remove the now defunct data.' );
 	}
 
 	public function create_tables() {
