@@ -503,7 +503,7 @@ class DMA_Migration extends WP_CLI_Command {
 			"
 			SELECT *
 			FROM   {$wpdb->prefix}dma_log_entries
-			WHERE  'action' = 'claimed-reward'
+			WHERE  action = 'claimed-reward'
 			"
 		);
 		$count = 0;
@@ -511,10 +511,20 @@ class DMA_Migration extends WP_CLI_Command {
 
 		WP_CLI::line( 'Reward Migrator found ' . $found . ' entries.' );
 
-		$import_progress = \WP_CLI\Utils\make_progress_bar( 'Importing ' . $found . ' entries into Activity Stream.', $found );
-		foreach ( $entries as $entry ) {
-			// Only import the item if its relevant to the activity stream
-			if ( in_array( $entry->action, array( 'activity', 'checked-in', 'claimed-reward', 'event', 'unlocked' ) ) ) {
+		// If we have reward entries to import...
+		if ( $found ) {
+
+			// Delete existing entries (to prevent duplicates)
+			$wpdb->delete(
+				$wpdb->prefix . 'dma_activity_stream',
+				array( 'action' => 'claimed-reward' )
+			);
+			WP_CLI::line( 'Deleted old reward entries from acticity stream.' );
+
+			// Import new entries
+			$import_progress = \WP_CLI\Utils\make_progress_bar( 'Importing ' . $found . ' entries into Activity Stream.', $found );
+			foreach ( $entries as $entry ) {
+
 				$wpdb->insert(
 					$wpdb->prefix . 'dma_activity_stream',
 					array(
@@ -532,11 +542,13 @@ class DMA_Migration extends WP_CLI_Command {
 						'%s', // timestamp
 					)
 				);
+
 				$count++;
+				$import_progress->tick();
 			}
-			$import_progress->tick();
+			$import_progress->finish();
 		}
-		$import_progress->finish();
+
 		WP_CLI::line( $count .' Reward entries imported.' );
 	}
 
