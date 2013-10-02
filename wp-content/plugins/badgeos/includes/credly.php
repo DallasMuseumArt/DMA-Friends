@@ -913,7 +913,7 @@ class BadgeOS_Credly {
         $meta = $this->badge_metabox_save_meta( $post_id, $fields );
 
         // Update our meta value with our returned Credly badge ID
-        if ( $credly_badge )
+        if ( isset( $credly_badge ) )
             update_post_meta( $post_id, '_badgeos_credly_badge_id', $credly_badge );
 
         return $post_id;
@@ -1079,6 +1079,10 @@ function credly_fieldmap_get_field_value( $post_id = '', $field = '' ) {
             break;
         case 'featured_image':
             $value = get_post_thumbnail_id( $post_id );
+            if ( ! $value ) {
+                $parent_achievement = get_page_by_path( get_post_type( $post_id ), OBJECT, 'achievement-type' );
+                $value = get_post_thumbnail_id( $parent_achievement->ID );
+            }
             break;
         case 'permalink':
             $value = get_permalink( $post_id );

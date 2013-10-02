@@ -15,21 +15,28 @@
  * @since  1.0.0
  * @param  integer $achievement_id The given achievement ID to possibly award
  * @param  integer $user_id        The given user's ID
+ * @param  string $trigger        The trigger
+ * @param  integer $site_id        The triggered site id
+ * @param  array $args        The triggered args
  * @return void
  */
-function badgeos_maybe_award_achievement_to_user( $achievement_id = 0, $user_id = 0 ) {
+function badgeos_maybe_award_achievement_to_user( $achievement_id = 0, $user_id = 0, $this_trigger = '', $site_id = '', $args = array() ) {
+
+	// Set to current site id
+	if ( ! $site_id )
+		$site_id = get_current_blog_id();
 
 	// Grab current user ID if one isn't specified
 	if ( ! $user_id )
 		$user_id = wp_get_current_user()->ID;
 
 	// If the user does not have access to this achievement, bail here
-	if ( ! badgeos_user_has_access_to_achievement( $user_id, $achievement_id ) )
+	if ( ! badgeos_user_has_access_to_achievement( $user_id, $achievement_id, $this_trigger, $site_id, $args ) )
 		return false;
 
 	// If the user has completed the achievement, award it
-	if ( badgeos_check_achievement_completion_for_user( $achievement_id, $user_id ) )
-		badgeos_award_achievement_to_user( $achievement_id, $user_id );
+	if ( badgeos_check_achievement_completion_for_user( $achievement_id, $user_id, $this_trigger, $site_id, $args ) )
+		badgeos_award_achievement_to_user( $achievement_id, $user_id, $this_trigger, $site_id, $args );
 }
 
 /**
@@ -38,12 +45,19 @@ function badgeos_maybe_award_achievement_to_user( $achievement_id = 0, $user_id 
  * @since  1.0.0
  * @param  integer $achievement_id The given achievement ID to verify
  * @param  integer $user_id        The given user's ID
+ * @param  string  $trigger        The trigger
+ * @param  integer $site_id        The triggered site id
+ * @param  array   $args           The triggered args
  * @return bool                    True if user has completed achievement, false otherwise
  */
-function badgeos_check_achievement_completion_for_user( $achievement_id = 0, $user_id = 0 ) {
+function badgeos_check_achievement_completion_for_user( $achievement_id = 0, $user_id = 0, $this_trigger = '', $site_id = '', $args = array() ) {
 
 	// Assume the user has completed the achievement
 	$return = true;
+
+	// Set to current site id
+	if ( ! $site_id )
+		$site_id = get_current_blog_id();
 
 	// If the user has not already earned the achievement...
 	if ( ! badgeos_get_user_achievements( array( 'user_id' => absint( $user_id ), 'achievement_id' => absint( $achievement_id ), 'since' => 1 + badgeos_achievement_last_user_activity( $achievement_id, $user_id ) ) ) ) {
@@ -64,7 +78,7 @@ function badgeos_check_achievement_completion_for_user( $achievement_id = 0, $us
 	}
 
 	// Available filter to support custom earning rules
-	return apply_filters( 'user_deserves_achievement', $return, $user_id, $achievement_id );
+	return apply_filters( 'user_deserves_achievement', $return, $user_id, $achievement_id, $this_trigger, $site_id, $args );
 
 }
 
@@ -77,7 +91,7 @@ function badgeos_check_achievement_completion_for_user( $achievement_id = 0, $us
  * @param  integer $achievement_id The given achievement's post ID
  * @return bool                    Our possibly updated earning status
  */
-function badgeos_user_meets_points_requirement( $return = false , $user_id = 0, $achievement_id = 0 ) {
+function badgeos_user_meets_points_requirement( $return = false, $user_id = 0, $achievement_id = 0 ) {
 
 	// First, see if the achievement requires a minimum amount of points
 	if ( 'points' == get_post_meta( $achievement_id, '_badgeos_earned_by', true ) ) {
@@ -109,9 +123,16 @@ add_filter( 'user_deserves_achievement', 'badgeos_user_meets_points_requirement'
  * @since  1.0.0
  * @param  integer $achievement_id The given achievement ID to award
  * @param  integer $user_id        The given user's ID
+ * @param  string $trigger        The trigger
+ * @param  integer $site_id        The triggered site id
+ * @param  array $args        The triggered args
  * @return void
  */
-function badgeos_award_achievement_to_user( $achievement_id = 0, $user_id = 0 ) {
+function badgeos_award_achievement_to_user( $achievement_id = 0, $user_id = 0, $this_trigger = '', $site_id = '', $args = array() ) {
+
+	// Set to current site id
+	if ( ! $site_id )
+		$site_id = get_current_blog_id();
 
 	// Use the current user ID if none specified
 	if ( $user_id == 0 )
@@ -127,10 +148,10 @@ function badgeos_award_achievement_to_user( $achievement_id = 0, $user_id = 0 ) 
 	badgeos_post_log_entry( $achievement_id, $user_id );
 
 	// Available hook for unlocking any achievement of this achievement type
-	do_action( 'badgeos_unlock_' . $achievement_object->post_type, $user_id, $achievement_id );
+	do_action( 'badgeos_unlock_' . $achievement_object->post_type, $user_id, $achievement_id, $this_trigger, $site_id, $args );
 
 	// Available hook to do other things with each awarded achievement
-	do_action( 'badgeos_award_achievement', $user_id, $achievement_id );
+	do_action( 'badgeos_award_achievement', $user_id, $achievement_id, $this_trigger, $site_id, $args );
 
 }
 
@@ -202,7 +223,7 @@ add_action( 'badgeos_award_achievement', 'badgeos_maybe_award_additional_achieve
  *
  * Triggers hook badgeos_unlock_all_{$post_type}
  *
- * @since  1.1.1
+ * @since  1.2.0
  * @param  integer $user_id        The given user's ID
  * @param  integer $achievement_id The given achievement's post ID
  * @return void
@@ -255,9 +276,16 @@ function badgeos_maybe_trigger_unlock_all( $user_id = 0, $achievement_id = 0 ) {
  * @since  1.0.0
  * @param  integer $user_id        The given user's ID
  * @param  integer $achievement_id The given achievement's post ID
+ * @param  string $trigger        The trigger
+ * @param  integer $site_id        The triggered site id
+ * @param  array $args        The triggered args
  * @return bool                    True if user has access, false otherwise
  */
-function badgeos_user_has_access_to_achievement( $user_id = 0, $achievement_id = 0 ) {
+function badgeos_user_has_access_to_achievement( $user_id = 0, $achievement_id = 0, $this_trigger = '', $site_id = '', $args = array() ) {
+
+	// Set to current site id
+	if ( ! $site_id )
+		$site_id = get_current_blog_id();
 
 	// Assume we have access
 	$return = true;
@@ -274,7 +302,7 @@ function badgeos_user_has_access_to_achievement( $user_id = 0, $achievement_id =
 	if ( $return && $parent_achievement = badgeos_get_parent_of_achievement( $achievement_id ) ) {
 
 		// If we don't have access to the parent, we do not have access to this
-		if ( ! badgeos_user_has_access_to_achievement( $user_id, $parent_achievement->ID ) )
+		if ( ! badgeos_user_has_access_to_achievement( $user_id, $parent_achievement->ID, $this_trigger, $site_id, $args ) )
 			$return = false;
 
 		// If the parent requires sequential steps, confirm we've earned all previous steps
@@ -294,7 +322,7 @@ function badgeos_user_has_access_to_achievement( $user_id = 0, $achievement_id =
 	}
 
 	// Available filter for custom overrides
-	return apply_filters( 'user_has_access_to_achievement', $return, $user_id, $achievement_id );
+	return apply_filters( 'user_has_access_to_achievement', $return, $user_id, $achievement_id, $this_trigger, $site_id, $args );
 
 }
 
@@ -307,7 +335,7 @@ function badgeos_user_has_access_to_achievement( $user_id = 0, $achievement_id =
  * @param  integer $step_id  The given step's post ID
  * @return bool              True if user has access to step, false otherwise
  */
-function badgeos_user_has_access_to_step( $return = false , $user_id = 0 , $step_id = 0 ) {
+function badgeos_user_has_access_to_step( $return = false, $user_id = 0, $step_id = 0 ) {
 
 	// If we're not working with a step, bail here
 	if ( 'step' != get_post_type( $step_id ) )
@@ -340,7 +368,7 @@ add_filter( 'user_has_access_to_achievement', 'badgeos_user_has_access_to_step',
  * @param  integer $step_id  The post ID for our step
  * @return bool              True if user deserves step, false otherwise
  */
-function badgeos_user_deserves_step( $return = false , $user_id = 0 , $step_id = 0 ) {
+function badgeos_user_deserves_step( $return = false, $user_id = 0, $step_id = 0 ) {
 
 	// Only override the $return data if we're working on a step
 	if ( 'step' == get_post_type( $step_id ) ) {
@@ -370,7 +398,7 @@ add_filter( 'user_deserves_achievement', 'badgeos_user_deserves_step', 10, 3 );
  * @param  integer $step_id The given step's ID
  * @return integer          The total activity count
  */
-function badgeos_get_step_activity_count( $user_id = 0 , $step_id = 0 ) {
+function badgeos_get_step_activity_count( $user_id = 0, $step_id = 0 ) {
 
 	// Assume the user has no relevant activities
 	$activities = array();

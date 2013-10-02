@@ -159,7 +159,7 @@ function badgeos_user_profile_data( $user = null ) {
 				) );
 
 				echo '<tr>';
-					echo '<td>'. get_the_post_thumbnail( $achievement->ID, array( 50, 50 ) ) .'</td>';
+					echo '<td>'. badgeos_get_achievement_post_thumbnail( $achievement->ID, array( 50, 50 ) ) .'</td>';
 					echo '<td>', edit_post_link( get_the_title( $achievement->ID ), '', '', $achievement->ID ), ' </td>';
 					echo '<td> <span class="delete"><a class="error" href="'.esc_url( wp_nonce_url( $revoke_url, 'badgeos_revoke_achievement' ) ).'">' . __( 'Revoke Award', 'badgeos' ) . '</a></span></td>';
 				echo '</tr>';
@@ -375,22 +375,38 @@ function badgeos_process_user_data() {
 add_action( 'init', 'badgeos_process_user_data' );
 
 /**
- * Returns array of user log ids (log/journey cpt) from post ids array and a user id.
+ * Returns array of achievement types a user has earned across a multisite network
  *
- * @since  unknown
- * @param  array   $post_ids An array of post IDs
+ * @since  1.2.0
  * @param  integer $user_id  The user's ID
- * @return array             An array of connected log IDs
+ * @return array             An array of post types
  */
-function badgeos_get_userlog_ids( $post_ids = array(), $user_id = 0 ){
-	global $wpdb;
-	if ( is_array( $post_ids ) ) {
-		$post_ids = implode( ',', $post_ids );
-		$sql = "SELECT a.ID FROM $wpdb->posts a, $wpdb->postmeta b WHERE a.ID = b.post_id AND a.post_author = ".$user_id." AND a.post_status = 'publish' AND b.meta_key = '_badgeos_log_achievement_id' and b.meta_value in ( ".$post_ids." )";
-		$rs = $wpdb->get_results( $sql );
-		foreach ( $rs as $post ) {
-			$log_ids[] = $post->ID;
-		}
-		return $log_ids;
+function badgeos_get_network_achievement_types_for_user( $user_id ) {
+	global $blog_id;
+
+	// Assume we have no achievement types
+	$all_achievement_types = array();
+
+	// Loop through all active sites
+	$sites = badgeos_get_network_site_ids();
+	foreach( $sites as $site_blog_id ){
+
+		// If we're polling a different blog, switch to it
+		if ( $blog_id != $site_blog_id )
+			switch_to_blog( $site_blog_id );
+
+		// Merge earned achievements to our achievement type array
+		$achievement_types = badgeos_get_user_earned_achievement_types( $user_id );
+		if ( is_array($achievement_types) )
+			$all_achievement_types = array_merge($achievement_types,$all_achievement_types);
 	}
+
+	// Restore the original blog so the sky doesn't fall
+	restore_current_blog();
+
+	// Pare down achievement type list so we return no duplicates
+	$achievement_types = array_unique( $all_achievement_types );
+
+	// Return all found achievements
+	return $achievement_types;
 }

@@ -4,7 +4,7 @@
 * Plugin URI: http://www.badgeos.org/
 * Description: BadgeOS lets your site’s users complete tasks and earn badges that recognize their achievement.  Define achievements and choose from a range of options that determine when they're complete.  Badges are Mozilla Open Badges (OBI) compatible through integration with the “Open Credit” API by Credly, the free web service for issuing, earning and sharing badges for lifelong achievement.
 * Author: Credly
-* Version: 1.2.0-dma-alpha
+* Version: 1.2.0
 * Author URI: https://credly.com/
 * License: GNU AGPL
 */
@@ -26,6 +26,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>;.
 */
 
 class BadgeOS {
+
+	/**
+	 * BadgeOS Version
+	 *
+	 * @var string
+	 */
+	public static $version = '1.2.0';
 
 	function __construct() {
 		// Define plugin constants
@@ -59,6 +66,7 @@ class BadgeOS {
 	 * Include all our important files.
 	 */
 	function includes() {
+		require_once( $this->directory_path . 'includes/class.BadgeOS_Plugin_Updater.php' );
 		require_once( $this->directory_path . 'includes/post-types.php' );
 		require_once( $this->directory_path . 'includes/admin-settings.php' );
 		require_once( $this->directory_path . 'includes/achievement-functions.php' );
