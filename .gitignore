@@ -1,4 +1,5 @@
 .htaccess
+.DS_Store
 .svn
 xhprof
 wp-config.php
@@ -14,8 +15,8 @@ wp-content/cache/
 wp-content/backups/
 sitemap.xml.gz
 build/api
-build/code-browser  
-build/coverage  
-build/logs  
-build/pdepend  
+build/code-browser
+build/coverage
+build/logs
+build/pdepend
 build/phpdox
