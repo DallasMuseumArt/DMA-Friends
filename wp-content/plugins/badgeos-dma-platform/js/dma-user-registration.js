@@ -307,5 +307,14 @@ $(document).ready(function(){
 	$('#phone').keyup( function() { this.value = this.value.replace( /[^\d]/g, '' ).substring( 0, 10 ); is_phone_valid(); maybe_disable_continue(); });
 	$('#zip').keyup( function() { this.value = this.value.replace( /[^\d]/g, '' ).substring( 0, 5 ); });
 
+	// Prevent registration submission button from being clicked more than once
+	$('#registration').on( 'click', '.registration-submit', function( event ) {
+		// Disable the button
+		$(this).attr( 'disabled', 'disabled' );
+
+		// Continue with form submission
+		$('#registration').submit();
+	});
+
 });
 })(jQuery);
