@@ -151,6 +151,10 @@ function dma_process_user_registration() {
 	if ( ! ( isset( $_POST['profile_data'] ) && wp_verify_nonce( $_POST['profile_data'], 'register_new_user' ) ) )
 		return;
 
+	// If we have no email address, bail here
+	if ( empty( $_POST['email'] ) )
+		return;
+
 	// Generate a unique username, 15 characters long prefixed with DMFDX
 	$username = substr( uniqid( 'FR' ), 0, 10 );
 
