@@ -60,7 +60,7 @@ function dma_user_registration_form() {
 		<div class="registration-step step-4">
 			<h2>Enter Mobile Phone Number</h2>
 			<p>'. __( 'Sharing your mobile number with DMA Friends is optional but enables you to use Friends in new ways. By entering your phone number here, you agree to allow us to text message you occasionally about your friends membership and your activities.', 'dma' ) .'</p>
-			<label for="phone">Mobile Phone Number (optional)</label>
+			<label for="phone">Mobile Phone Number</label>
 			<input type="tel" name="phone" id="phone" placeholder="" />
 			<p class="phone-error error" style="visibility: hidden;"></p>
 		</div><!-- .registration-step .step-4 -->
@@ -74,12 +74,12 @@ function dma_user_registration_form() {
 			<p>'. __( 'Your zip code is optional and will never be shared with outside parties.', 'dma' ) .'</p>
 			<label for="zip">'. __( 'Zip Code (Optional)', 'dma' ) .'</label>
 			<input type="tel" name="zip" id="zip" placeholder="" />
-			<h2>Current Members</h2>
-			<p>'. __( 'Please let us know if you are currently a member of the DMA.', 'dma' ) .'</p>
+			<h2>Current DMA Partners</h2>
+			<p>'. __( 'Please let us know if you are a current partner of the DMA.', 'dma' ) .'</p>
 			<label for="current_member" class="standard">I am a current member.</label>
 			<input type="checkbox" name="current_member" id="current_member">
 			<div class="hidden">
-				<label for="current_member_number">'. __( 'DMA Member ID (Optional)', 'dma' ) .'</label>
+				<label for="current_member_number">'. __( 'DMA Friend ID as listed on DMA Partner card (optional)', 'dma' ) .'</label>
 				<input type="tel" name="current_member_number" id="current_member_number" placeholder="" />
 			</div>
 		</div><!-- .registration-step .step-5 -->
