@@ -15,9 +15,9 @@
  * @since  1.0.0
  * @param  integer $achievement_id The given achievement ID to possibly award
  * @param  integer $user_id        The given user's ID
- * @param  string $trigger        The trigger
+ * @param  string $trigger         The trigger
  * @param  integer $site_id        The triggered site id
- * @param  array $args        The triggered args
+ * @param  array $args             The triggered args
  * @return void
  */
 function badgeos_maybe_award_achievement_to_user( $achievement_id = 0, $user_id = 0, $this_trigger = '', $site_id = '', $args = array() ) {
@@ -123,20 +123,26 @@ add_filter( 'user_deserves_achievement', 'badgeos_user_meets_points_requirement'
  * @since  1.0.0
  * @param  integer $achievement_id The given achievement ID to award
  * @param  integer $user_id        The given user's ID
- * @param  string $trigger        The trigger
+ * @param  string $trigger         The trigger
  * @param  integer $site_id        The triggered site id
- * @param  array $args        The triggered args
+ * @param  array $args             The triggered args
  * @return void
  */
 function badgeos_award_achievement_to_user( $achievement_id = 0, $user_id = 0, $this_trigger = '', $site_id = '', $args = array() ) {
 
-	// Set to current site id
-	if ( ! $site_id )
-		$site_id = get_current_blog_id();
+	global $wp_filter, $wp_version;
+
+	// Sanity Check: ensure we're working with an achievement post
+	if ( ! badgeos_is_achievement( $achievement_id ) )
+		return false;
 
 	// Use the current user ID if none specified
 	if ( $user_id == 0 )
 		$user_id = wp_get_current_user()->ID;
+
+	// Get the current site ID none specified
+	if ( ! $site_id )
+		$site_id = get_current_blog_id();
 
 	// Setup our achievement object
 	$achievement_object = badgeos_build_achievement_object( $achievement_id );
@@ -150,8 +156,26 @@ function badgeos_award_achievement_to_user( $achievement_id = 0, $user_id = 0, $
 	// Available hook for unlocking any achievement of this achievement type
 	do_action( 'badgeos_unlock_' . $achievement_object->post_type, $user_id, $achievement_id, $this_trigger, $site_id, $args );
 
+	// Patch for WordPress to support recursive actions, specifically for badgeos_award_achievement
+	// Because global iteration is fun, assuming we can get this fixed for WordPress 3.9
+	$is_recursed_filter = ( 'badgeos_award_achievement' == current_filter() && version_compare( $wp_version, '3.9', '<' ) );
+	$current_key = null;
+
+	// Get current position
+	if ( $is_recursed_filter ) {
+		$current_key = key( $wp_filter[ 'badgeos_award_achievement' ] );
+	}
+
 	// Available hook to do other things with each awarded achievement
 	do_action( 'badgeos_award_achievement', $user_id, $achievement_id, $this_trigger, $site_id, $args );
+
+	if ( $is_recursed_filter ) {
+		reset( $wp_filter[ 'badgeos_award_achievement' ] );
+
+		while ( key( $wp_filter[ 'badgeos_award_achievement' ] ) !== $current_key ) {
+			next( $wp_filter[ 'badgeos_award_achievement' ] );
+		}
+	}
 
 }
 
@@ -284,26 +308,30 @@ function badgeos_maybe_trigger_unlock_all( $user_id = 0, $achievement_id = 0 ) {
 function badgeos_user_has_access_to_achievement( $user_id = 0, $achievement_id = 0, $this_trigger = '', $site_id = '', $args = array() ) {
 
 	// Set to current site id
-	if ( ! $site_id )
+	if ( ! $site_id ) {
 		$site_id = get_current_blog_id();
+	}
 
 	// Assume we have access
 	$return = true;
 
 	// If the achievement is not published, we do not have access
-	if ( 'publish' != get_post_status( $achievement_id ) )
+	if ( 'publish' != get_post_status( $achievement_id ) ) {
 		$return = false;
+	}
 
 	// If we've exceeded the max earnings, we do not have acces
-	if ( $return && badgeos_achievement_user_exceeded_max_earnings( $user_id, $achievement_id ) )
+	if ( $return && badgeos_achievement_user_exceeded_max_earnings( $user_id, $achievement_id ) ) {
 		$return = false;
+	}
 
 	// If we have access, and the achievement has a parent...
 	if ( $return && $parent_achievement = badgeos_get_parent_of_achievement( $achievement_id ) ) {
 
 		// If we don't have access to the parent, we do not have access to this
-		if ( ! badgeos_user_has_access_to_achievement( $user_id, $parent_achievement->ID, $this_trigger, $site_id, $args ) )
+		if ( ! badgeos_user_has_access_to_achievement( $user_id, $parent_achievement->ID, $this_trigger, $site_id, $args ) ) {
 			$return = false;
+		}
 
 		// If the parent requires sequential steps, confirm we've earned all previous steps
 		if ( $return && badgeos_is_achievement_sequential( $parent_achievement->ID ) ) {
