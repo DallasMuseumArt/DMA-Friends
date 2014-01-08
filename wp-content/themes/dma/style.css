@@ -460,7 +460,8 @@ h2 a {
 
 h3 {
   font-size: 32px;
-  line-height: 40px; }
+  line-height: 40px; 
+  padding-top: 15px; }
 
 h4 {
   font-size: 36px; }
@@ -933,12 +934,16 @@ input:hover[type="submit"] {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch; }
 .badge.popup .progress-wrap {
+  float: left;
   padding: 8px 0 5px; }
   .badge.popup .progress-wrap:after {
     content: '';
     display: block;
     width: 100%;
     clear: both; }
+.badge.popup .step {
+  clear: both;
+}
 .badge.popup .icon-progress {
   position: relative;
   display: block;
