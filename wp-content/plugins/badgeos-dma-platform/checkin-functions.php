@@ -23,12 +23,17 @@ function dma_create_checkin( $user_id = 0, $activity_id = 0, $date = NULL, $loca
 	$checked_in = false;
 
 	// If no activity ID, bail now
-	if ( ! $activity_id )
+	if ( ! $activity_id ) {
 		return false;
+    } else {
+        $activity_id = absint($activity_id);
+    }
 
 	// If no user ID, get our current user
 	if ( ! $user_id )
 		$user_id = get_current_user_id();
+
+    $user_id = absint($user_id);
 
 	// Grab the current date if no date specified
 	if ( ! $date )
@@ -52,17 +57,25 @@ function dma_create_checkin( $user_id = 0, $activity_id = 0, $date = NULL, $loca
 
 	// Log this check-in
 	$checked_in = dma_post_log_entry( null, array(
-		'user_id'    => absint( $user_id ),
-		'object_id'  => absint( $activity_id ),
+		'user_id'    => $user_id,
+		'object_id'  => $activity_id,
 		'action'     => 'activity',
-		'title'      => "{$user_id} just checked-in using code {$accession_id}",
+		'title'      => "{$user_id} just checked-in using code {$accession_id} with stepsB: " . $steps,
 		'artwork_id' => esc_html( $artwork_id ),
 		'timestamp'  => $date
 	) );
 
+    // Find all steps associated to the activity and remove the cache
+    $steps = $wpdb->get_results(
+        "select p2p_to from {$wpdb->prefix}p2p where p2p_from = $activity_id and p2p_type = 'activity-to-step'"
+    );
+    foreach($steps as $step) {
+        delete_transient('dma_checkin_steps_' . $user_id . ':' . $step->p2p_to);
+    }
+
 	// Add a hook so we can do other things too
 	do_action( 'dma_create_checkin', $checked_in, $user_id, $activity_id, $date, $location_id, $accession_id, $is_admin );
-
+    
 	// Return our checked_in status
 	return $checked_in;
 }
@@ -251,6 +264,11 @@ function dma_find_relevant_activity_for_step( $step_id = 0 ) {
 function dma_find_user_checkins_for_step( $user_id, $step_id ) {
 	global $wpdb;
 
+    // Check for cached data first
+    $cache_key = 'dma_checkin_steps_' . $user_id . ':' . $step_id;
+    $checkins = get_transient($cache_key);
+    if ($checkins !== FALSE) return $checkins;
+
 	// Grab the parent achievement
 	$parent_achievement = badgeos_get_parent_of_achievement( $step_id );
 
@@ -288,6 +306,9 @@ function dma_find_user_checkins_for_step( $user_id, $step_id ) {
 			$checkins = array_udiff( $checkins, $active_achievement->used_checkins, 'dma_compare_checkins' );
 		}
 	}
+
+    // Build cache
+    set_transient($cache_key, $checkins, YEAR_IN_SECONDS);
 
 	// Finally, return our relevant check-ins
 	return $checkins;
