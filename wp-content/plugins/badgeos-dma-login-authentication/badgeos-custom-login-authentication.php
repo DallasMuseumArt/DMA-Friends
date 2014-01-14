@@ -46,8 +46,8 @@ class BadgeOS_Custom_Authentication {
 	function is_ip_whitelisted() {
 
 		// Setup our IP range
-		$range_start = ip2long( apply_filters( 'dma_iprange_start',  '66.195.106.0' ) );
-		$range_end   = ip2long( apply_filters( 'dma_iprange_end',    '66.195.106.255' ) );
+		$range_start = ip2long( get_option('dma_iprange_start') );
+		$range_end   = ip2long( get_option('dma_iprange_end') );
 		$ip          = ip2long( apply_filters( 'dma_current_user_ip', $_SERVER['REMOTE_ADDR'] ) );
 
 		// If we're inside the range
@@ -309,4 +309,44 @@ $badgeos_custom_authentication = new BadgeOS_Custom_Authentication;
  */
 function dma_login_form( $args = array() ) {
 	return BadgeOS_Custom_Authentication::login_form( $args );
+}
+
+add_action('admin_menu', 'badgeos_custom_login_authentication_menu');
+
+function badgeos_custom_login_authentication_menu() {
+    add_options_page('Friends Authentication Settings', 'Friends Authentication', 'manage_options', 'badgeos-custom-login-authentication', 'badgeos_custom_auth_options');
+}
+
+function badgeos_custom_auth_options() {
+    if ( !current_user_can( 'manage_options' ) )  {
+        wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+    }
+
+    $dma_iprange_start = get_option('dma_iprange_start');
+    $dma_iprange_end = get_option('dma_iprange_end');
+
+    if (isset($_POST['dma_iprange_start']) && isset($_POST['dma_iprange_end'])) {
+        $dma_iprange_start = $_POST['dma_iprange_start'];
+        $dma_iprange_end = $_POST['dma_iprange_end'];
+        update_option('dma_iprange_start', $dma_iprange_start);
+        update_option('dma_iprange_end', $dma_iprange_end); 
+    }
+
+?>
+<form name="badgeos-settings" method="POST" action="">
+    <p>
+        <?php _e("Starting IP:", 'dma-iprange-start' ); ?> 
+        <input type="text" name="dma_iprange_start" value="<?php echo $dma_iprange_start; ?>">
+    </p>
+    <p>
+        <?php _e("Ending IP:", 'dma-iprange-end' ); ?> 
+        <input type="text" name="dma_iprange_end" value="<?php echo $dma_iprange_end; ?>">
+    </p>
+
+    <p class="submit">
+        <input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ?>" />
+    </p>
+        
+</form>
+<?php
 }
