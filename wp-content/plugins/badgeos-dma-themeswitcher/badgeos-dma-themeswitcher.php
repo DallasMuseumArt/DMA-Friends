@@ -25,26 +25,6 @@ class DMA_Theme_Switcher {
 	}
 
 	/**
-	 * Determine if current user's IP is whitelisted
-	 *
-	 * @since  1.0
-	 * @return boolean True if user's IP address is inside our specified range, false otherwise
-	 */
-	function is_ip_whitelisted() {
-
-		// Setup our IP range
-		$range_start = ip2long( apply_filters( 'dma_iprange_start',  '66.195.106.0' ) );
-		$range_end   = ip2long( apply_filters( 'dma_iprange_end',    '66.195.106.255' ) );
-		$ip          = ip2long( apply_filters( 'dma_current_user_ip', $_SERVER['REMOTE_ADDR'] ) );
-
-		// If we're inside the range
-		if ($ip >= $range_start && $ip <= $range_end)
-			return true;
-		else
-			return false;
-	}
-
-	/**
 	 * Get the desired theme stylesheet
 	 *
 	 * @since  1.0
@@ -96,7 +76,7 @@ class DMA_Theme_Switcher {
 		} else {
 
 			// If we're using a DMA kiosk...
-			if ( $this->is_ip_whitelisted() )
+			if ( BadgeOS_Custom_Authentication::is_ip_whitelisted() )
 				return wp_get_theme('dma');
 
 			// Otherwise, we're using any other device...
