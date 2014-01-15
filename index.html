@@ -41,35 +41,17 @@ Badges and Rewards to enhance the visitor experience.</p>
 <h3>
 <a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h3>
 
-<ul>
-<li>Download the latest version of friends (<a href="https://github.com/DallasMuseumArt/DMA-Friends/zipball/master">zip</a> or <a href="https://github.com/DallasMuseumArt/DMA-Friends/tarball/master">gzip</a>).</li>
-</ul><p>via Zip</p>
+<ol>
+<li>
+<p>Download the latest version of friends via git</p>
 
-<pre><code>wget -O friends-latest.zip https://github.com/DallasMuseumArt/DMA-Friends/zipball/master
+<pre><code>git clone https://github.com/DallasMuseumArt/DMA-Friends.git
 </code></pre>
-
-<p>via Gzip</p>
-
-<pre><code>wget -O friends-latest.tar.gz https://github.com/DallasMuseumArt/DMA-Friends/tarball/master
-</code></pre>
-
-<ul>
-<li>Extract the compressed file into the DocumentRoot on your webserver.</li>
-</ul><p>via Zip</p>
-
-<pre><code>unzip friends-latest.zip
-</code></pre>
-
-<p>via Gzip</p>
-
-<pre><code>tar zxvf friends-latest.tar.gz
-</code></pre>
-
-<ul>
+</li>
 <li>
 <p>Change directory to themes</p>
 
-<pre><code>cd PATH-TO-FRIENDS/wp-content/themes
+<pre><code>cd DMA-Friends/wp-content/themes
 </code></pre>
 </li>
 <li>
@@ -79,7 +61,30 @@ Badges and Rewards to enhance the visitor experience.</p>
 </code></pre>
 </li>
 <li><p>Follow the steps to do a basic <a href="http://codex.wordpress.org/Installing_WordPress">wordpress install</a></p></li>
+<li><p>Select "Settings" &gt; "Permalinks" from the left hand menu. Then select the option "Post name" and save your changes</p></li>
+<li>
+<p>Select "Plugins" from the left hand menu and activate the following plugins</p>
+
+<ul>
+<li>BadgeOS</li>
+<li>BadgeOS DMA Print</li>
+<li>BadgeOS Rewards</li>
+<li>DMA Custom Login Authentication for BadgeOS</li>
+<li>DMA Platform</li>
+<li>DMA SMS Functions</li>
+<li>DMA Theme Switcher</li>
 </ul>
+</li>
+<li><p>Visit "Settings" &gt; "Friends Themeswitcher".  Unless you have changed the name of the themes set "Kiosk Theme" to "DMA" and "Portal Theme" to "DMA Portal"</p></li>
+</ol><h3>
+<a name="getting-started" class="anchor" href="#getting-started"><span class="octicon octicon-link"></span></a>Getting Started</h3>
+
+<p>Visit the <a href="https://github.com/DallasMuseumArt/DMA-Friends/wiki/Getting-Started">Getting Started</a> wiki page for instructions on configuring Friends.</p>
+
+<h3>
+<a name="contributions" class="anchor" href="#contributions"><span class="octicon octicon-link"></span></a>Contributions</h3>
+
+<p>Contributions created by partnering museums will be linked here</p>
       </section>
     </div>
 
