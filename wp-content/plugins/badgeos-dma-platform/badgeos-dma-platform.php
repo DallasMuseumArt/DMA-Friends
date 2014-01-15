@@ -61,7 +61,6 @@ class DMA {
 	}
 
 	function admin_scripts( $hook_suffix ) {
-
 		// Load up our custom stuff
 		wp_enqueue_style( 'dma-platform-admin', $this->directory_url . 'css/admin.css' );
 		wp_enqueue_script( 'dma-platform-admin', $this->directory_url . 'js/admin.js', array( 'jquery-ui-sortable', 'jquery-ui-datepicker' ) );
@@ -70,7 +69,7 @@ class DMA {
 		// Load up Genesis Admin JS so we can have "check all/none" on our custom taxonomies
 		// Note: we're forcing it in like this because by default it's only loaded if post supports Genesis SEO
 		if ( 'post-new.php' == $hook_suffix || 'post.php' == $hook_suffix ) {
-			genesis_load_admin_js();
+		 	genesis_load_admin_js();
 		}
 
 	}

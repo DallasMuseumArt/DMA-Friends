@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Edit post administration panel.
  *
