@@ -24,7 +24,7 @@ git clone https://github.com/DallasMuseumArt/dma-friends-themes.git
 
 4. Follow the steps to do a basic [wordpress install](http://codex.wordpress.org/Installing_WordPress)
 
-5. Visit the configuration settings for permalinks http://mysite.com/wp-admin/options-permalink.php and select the option "Post name"
+5. Select "Settings" > "Permalinks" from the left hand menu. Then select the option "Post name" and save your changes
 
 6. Select "Plugins" from the left hand menu and activate the following plugins
     * BadgeOS
