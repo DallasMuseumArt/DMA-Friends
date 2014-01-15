@@ -7,38 +7,40 @@ Badges and Rewards to enhance the visitor experience.
 
 ### Installation
 
-* Download the latest version of friends ([zip](https://github.com/DallasMuseumArt/DMA-Friends/zipball/master) or [gzip](https://github.com/DallasMuseumArt/DMA-Friends/tarball/master)).
-
-via Zip
+1. Download the latest version of friends via git
 ```
-wget -O friends-latest.zip https://github.com/DallasMuseumArt/DMA-Friends/zipball/master
+git clone https://github.com/DallasMuseumArt/DMA-Friends.git
 ```
 
-via Gzip
+2. Change directory to themes
 ```
-wget -O friends-latest.tar.gz https://github.com/DallasMuseumArt/DMA-Friends/tarball/master
-```
-
-* Extract the compressed file into the DocumentRoot on your webserver.
-
-via Zip
-```
-unzip friends-latest.zip
+cd DMA-Friends/wp-content/themes
 ```
 
-via Gzip
-```
-tar zxvf friends-latest.tar.gz
-```
-
-* Change directory to themes
-```
-cd PATH-TO-FRIENDS/wp-content/themes
-```
-
-* Download a copy of the base themes
+3. Download a copy of the base themes
 ```
 git clone https://github.com/DallasMuseumArt/dma-friends-themes.git
 ```
 
-* Follow the steps to do a basic [wordpress install](http://codex.wordpress.org/Installing_WordPress)
+4. Follow the steps to do a basic [wordpress install](http://codex.wordpress.org/Installing_WordPress)
+
+5. Visit the configuration settings for permalinks http://mysite.com/wp-admin/options-permalink.php and select the option "Post name"
+
+6. Select "Plugins" from the left hand menu and activate the following plugins
+    * BadgeOS
+    * BadgeOS DMA Print
+    * BadgeOS Rewards
+    * DMA Custom Login Authentication for BadgeOS
+    * DMA Platform
+    * DMA SMS Functions
+    * DMA Theme Switcher
+
+7. Visit "Settings" > "Friends Themeswitcher".  Unless you have changed the name of the themes set "Kiosk Theme" to "DMA" and "Portal Theme" to "DMA Portal"
+
+### Getting Started
+
+Visit the [Getting Started](https://github.com/DallasMuseumArt/DMA-Friends/wiki/Getting-Started) wiki page for instructions on configuring Friends.
+
+### Contributions
+
+Contributions created by partnering museums will be linked here
