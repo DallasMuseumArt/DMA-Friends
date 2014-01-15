@@ -21,3 +21,4 @@ build/logs
 build/pdepend
 build/phpdox
 wp-content/themes/dma-friends-themes
+wp-content/plugins/contrib
