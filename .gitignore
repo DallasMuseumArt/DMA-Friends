@@ -20,3 +20,4 @@ build/coverage
 build/logs
 build/pdepend
 build/phpdox
+wp-content/themes/dma-friends-themes
