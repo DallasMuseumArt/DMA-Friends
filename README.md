@@ -19,7 +19,8 @@ cd DMA-Friends/wp-content/themes
 
 3. Download a copy of the base themes
 ```
-git clone https://github.com/DallasMuseumArt/dma-friends-themes.git
+git clone https://github.com/DallasMuseumArt/dma-friends-kiosk.git dma
+git clone https://github.com/DallasMuseumArt/dma-friends-portal.git dma-portal
 ```
 
 4. Follow the steps to do a basic [wordpress install](http://codex.wordpress.org/Installing_WordPress)

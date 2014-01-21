@@ -20,5 +20,5 @@ build/coverage
 build/logs
 build/pdepend
 build/phpdox
-wp-content/themes/dma-friends-themes
-wp-content/plugins/contrib
+wp-content/themes/dma
+wp-content/themes/dma-portal
