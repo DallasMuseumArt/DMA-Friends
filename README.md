@@ -42,6 +42,9 @@ git clone https://github.com/DallasMuseumArt/dma-friends-portal.git dma-portal
 
 Visit the [Getting Started](https://github.com/DallasMuseumArt/DMA-Friends/wiki/Getting-Started) wiki page for instructions on configuring Friends.
 
+### iPad App
+You can download the iPad app [here](https://github.com/DallasMuseumArt/DMA-Friends-iOS).  Information about building and deploying iOS apps is available at the [Apple developer portal](https://developer.apple.com/library/mac/documentation/IDEs/Conceptual/AppDistributionGuide/TestingYouriOSApp/TestingYouriOSApp.html)
+
 ### Contributions
 
 Contributions created by partnering museums will be linked here
