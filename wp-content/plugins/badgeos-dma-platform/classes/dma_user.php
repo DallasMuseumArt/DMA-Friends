@@ -1,5 +1,7 @@
 <?php
 
+use BadgeOS\LogEntry;
+
 // If this class already exists, just stop here
 if ( ! class_exists( 'DMA_User' ) ) {
 
@@ -448,29 +450,8 @@ class DMA_User extends DMA_Base {
 		// Assume we have nothing to output
 		$output = '';
 
-		// Attempt to pull back our cached activities query
-		$activities = maybe_unserialize( get_transient( "dma_user_{$this->ID}_activity_stream" ) );
-
-		// If we have no activities, run a new query
-		if ( empty( $activities ) ) {
-
-			// Get the user's activity stream items
-			$activities = $wpdb->get_results(
-				$wpdb->prepare(
-					"
-					SELECT   *
-					FROM     {$wpdb->prefix}dma_activity_stream
-					WHERE    user_id = %d
-					ORDER BY timestamp DESC
-					",
-					$this->ID
-				)
-			);
-
-			// Store our query for the next 24hrs
-			set_transient( "dma_user_{$this->ID}_activity_stream", $activities, DAY_IN_SECONDS );
-		}
-
+        $activities = LogEntry::where('user_id', '=', $this->ID)->orderBy('timestamp', 'desc')->take(20)->get();
+error_log(print_r($activities, true));
 
 		// If we have activities, generate our output
 		if ( ! empty( $activities ) ) {
@@ -528,6 +509,7 @@ class DMA_User extends DMA_Base {
 
 						// Otherwise, this is a normal activity
 						} else {
+error_log(print_r($activity, true));
 							$output .= $this->build_stream_item( array(
 								'title' => get_the_title( $activity->object_id ),
 								'time'  => $activity->timestamp,
@@ -575,6 +557,7 @@ class DMA_User extends DMA_Base {
 			'time'  => '',
 		) );
 		extract( $args );
+error_log(print_r($args, true));
 
 		$output = '<div class="stream stream-'. $type .'">';
 			$output .= '<div class="desc icon-'. $icon .'">'. $label .': <span>'. $title .'</span></div>';

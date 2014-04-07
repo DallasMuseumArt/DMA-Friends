@@ -112,8 +112,11 @@ function badgeos_credly_get_api_key( $username = '', $password = '' ) {
 	$url = BADGEOS_CREDLY_API_URL . 'authenticate/';
 
 	$response = wp_remote_post( $url, array(
-			'headers' => array( 'Authorization' => 'Basic ' . base64_encode( $username . ':' . $password ) )
-	) ) ;
+		'headers' => array(
+			'Authorization' => 'Basic ' . base64_encode( $username . ':' . $password )
+		),
+		'sslverify' => false
+	) );
 
 	// If the response is a WP error
 	if ( is_wp_error( $response ) ) {
@@ -139,6 +142,7 @@ function badgeos_credly_get_api_key( $username = '', $password = '' ) {
  * Saves an error string for display on Credly settings page
  * @since  1.0.0
  * @param  string $error Error message
+ * @return bool          False after updating option
  */
 function badgeos_credly_get_api_key_error( $error = '' ) {
 
@@ -184,6 +188,7 @@ function badgeos_settings_page() {
 			<?php $badgeos_settings = get_option( 'badgeos_settings' ); ?>
 			<?php
 			//load settings
+            $site_id = ( isset( $badgeos_settings['site_id'] ) ) ? $badgeos_settings['site_id'] : '';
 			$minimum_role = ( isset( $badgeos_settings['minimum_role'] ) ) ? $badgeos_settings['minimum_role'] : '';
 			$submission_email = ( isset( $badgeos_settings['submission_email'] ) ) ? $badgeos_settings['submission_email'] : '';
 			$debug_mode = ( isset( $badgeos_settings['debug_mode'] ) ) ? $badgeos_settings['debug_mode'] : 'disabled';
@@ -192,6 +197,11 @@ function badgeos_settings_page() {
 			wp_nonce_field( 'badgeos_settings_nonce', 'badgeos_settings_nonce' );
 			?>
 			<table class="form-table">
+                <tr valign="top"><th scope="row"><label for="site_id"><?php _e( 'Site ID: ', 'badgeos' ); ?></label></th>
+                    <td>
+                        <input id="site_id" name="badgeos_settings[site_id]" value="<?php print $site_id; ?>"/>
+                    </td>
+                </tr> 
 				<tr valign="top"><th scope="row"><label for="minimum_role"><?php _e( 'Minimum Role to Administer BadgeOS plugin: ', 'badgeos' ); ?></label></th>
 					<td>
                         <select id="minimum_role" name="badgeos_settings[minimum_role]">
@@ -222,7 +232,6 @@ function badgeos_settings_page() {
 				<?php
                 // check if multisite is enabled & if plugin is network activated
                 if ( is_super_admin() ){
-	                global $badgeos;
 	                if ( is_multisite() ) {
 	                ?>
 	                    <tr valign="top"><th scope="row"><label for="debug_mode"><?php _e( 'Show achievements earned across all sites on the network:', 'badgeos' ); ?></label></th>

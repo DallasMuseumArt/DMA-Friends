@@ -8,6 +8,8 @@
  * Author URI: http://WebDevStudios.com
  */
 
+require('vendor/autoload.php');
+
 class DMA {
 
 	function __construct() {
@@ -51,7 +53,6 @@ class DMA {
 			require_once( $this->directory_path . '/activity-functions.php' );
 			require_once( $this->directory_path . '/checkin-functions.php' );
 			require_once( $this->directory_path . '/location-functions.php' );
-			require_once( $this->directory_path . '/logging-functions.php' );
 			require_once( $this->directory_path . '/misc-functions.php' );
 			require_once( $this->directory_path . '/rules-engine.php' );
 			require_once( $this->directory_path . '/steps-ui.php' );
@@ -331,3 +332,14 @@ $GLOBALS['dma'] = new DMA();
 
 register_activation_hook( __FILE__, array( 'DMA', 'install' ) );
 
+/**
+ * Override default factory classes
+ */
+function dma_badgeos_settings() {
+    $badgeos_settings = get_option( 'badgeos_settings' );
+    if ( $badgeos_settings != 'DMA\DmaLog') {
+        $badgeos_settings['log_factory'] = 'DMA\DmaLog';
+        update_option( 'badgeos_settings', $badgeos_settings );
+    }   
+}
+add_action( 'init', 'dma_badgeos_settings' );

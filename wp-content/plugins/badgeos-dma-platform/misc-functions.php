@@ -169,7 +169,6 @@ function dma_delete_user_meta() {
 		// Grab our DMA User object
 		$user_id = absint( $_POST['user_id'] );
 
-		// Delete activity stream entries
 		$wpdb->delete( $wpdb->prefix . 'dma_activity_stream', array( 'user_id' => $user_id ), array( '%d' ) );
 
 		// Delete log entries

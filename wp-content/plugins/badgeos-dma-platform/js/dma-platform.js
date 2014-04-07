@@ -31,7 +31,10 @@ $(document).ready(function(){
 
 				// Clear out our input
 				input.val('');
-			}
+			},
+            error: function(err) {
+                console.log(err);
+            }
 		});
 
 	});

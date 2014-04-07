@@ -1,10 +1,12 @@
 <?php
+//MARK FOR DELETION
 
 /**
  * Remove default BadgeOS log entry hooks
  *
  * @since 2.0.0
  */
+/*
 function dma_remove_badgeos_log_entry_hooks() {
 	remove_filter( 'badgeos_post_log_entry', 'badgeos_log_entry' );
 	remove_action( 'badgeos_create_log_entry', 'badgeos_log_achievement_id' );
@@ -21,7 +23,10 @@ add_action( 'init', 'dma_remove_badgeos_log_entry_hooks' );
  * @return integer               The created log entry ID
  */
 function dma_post_log_entry( $log_entry_id, $args ) {
+    badgeos_post_log_entry( $args['object_id'], $args['user_id'], $args['action'], $args['title'] ); 
+    return true;
 
+/*
 	// If we weren't explicitly given a title, let's build one
 	if ( empty( $args['title'] ) ) {
 		$user              = get_userdata( $args['user_id'] );
@@ -40,6 +45,7 @@ function dma_post_log_entry( $log_entry_id, $args ) {
 	}
 
 	return $log_entry_id;
+*/
 }
 add_filter( 'badgeos_post_log_entry', 'dma_post_log_entry', 10, 2 );
 
@@ -86,6 +92,7 @@ add_action( 'badgeos_update_users_points', 'dma_log_users_points', 10, 5 );
  * @param  array  $args An associative array of our table columns and their data
  * @return mixed        ID of the inserted table row on success, false on failure
  */
+/*
 function dma_insert_activity_stream_entry( $args = array() ) {
 	global $wpdb;
 

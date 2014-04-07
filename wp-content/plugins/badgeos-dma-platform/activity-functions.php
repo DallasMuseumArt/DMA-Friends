@@ -299,7 +299,12 @@ function dma_award_activities_on_login( $user_id ) {
 		dma_activity_submit( $user_id, $activity->ID );
 	}
 }
+
+function dma_award_activities_on_login_default($user_login, $user) {
+    dma_award_activities_on_login($user->ID);
+}
 add_action( 'user_authenticated', 'dma_award_activities_on_login' );
+add_action( 'wp_login', 'dma_award_activities_on_login_default', 10, 2);
 
 /**
  * Cache buster to delete a user's activity stream cache

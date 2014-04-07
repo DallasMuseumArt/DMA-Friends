@@ -56,14 +56,7 @@ function dma_create_checkin( $user_id = 0, $activity_id = 0, $date = NULL, $loca
 	$artwork_id = ( 2344 == $activity_id ) ? $accession_id : null;
 
 	// Log this check-in
-	$checked_in = dma_post_log_entry( null, array(
-		'user_id'    => $user_id,
-		'object_id'  => $activity_id,
-		'action'     => 'activity',
-		'title'      => "{$user_id} just checked-in using code {$accession_id} with stepsB: " . $steps,
-		'artwork_id' => esc_html( $artwork_id ),
-		'timestamp'  => $date
-	) );
+    $checked_in = badgeos_post_log_entry( $activity_id, $user_id, 'activity', "{$user_id} just checked-in using code {$accession_id}:{$artwork_id}" );
 
     // Find all steps associated to the activity and remove the cache
     $steps = $wpdb->get_results(
