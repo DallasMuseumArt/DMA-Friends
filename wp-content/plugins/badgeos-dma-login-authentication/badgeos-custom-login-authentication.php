@@ -330,6 +330,9 @@ function badgeos_custom_auth_options() {
         $dma_iprange_end = $_POST['dma_iprange_end'];
         update_option('dma_iprange_start', $dma_iprange_start);
         update_option('dma_iprange_end', $dma_iprange_end); 
+?>
+<div class="updated"><p><strong><?php _e('settings saved.', 'menu-test' ); ?></strong></p></div>
+<?php
     }
 
 ?>

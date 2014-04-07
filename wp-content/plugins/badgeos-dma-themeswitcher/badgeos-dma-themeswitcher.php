@@ -13,9 +13,13 @@ class DMA_Theme_Switcher {
 	function __construct() {
 
 		// Grab our available themes
-		$this->available_themes = array();
-		$this->available_themes['dma'] = "DMA Friends Kiosk";
-		$this->available_themes['dma-portal'] = "DMA Friends Public";
+        $kiosk_theme = wp_get_theme(get_option('dma_kiosk_theme'));
+        $portal_theme = wp_get_theme(get_option('dma_portal_theme'));
+
+		$this->available_themes = array(
+            $kiosk_theme->stylesheet => $kiosk_theme->name,
+            $portal_theme->stylesheet => $portal_theme->name,
+        );
 
 		// Setup all our hooks and filters
 		add_action( 'init',       array( &$this, 'set_theme_cookie' ) );
@@ -181,3 +185,60 @@ class DMA_Theme_Switcher {
 	}
 }
 $theme_switcher = new DMA_Theme_Switcher();
+
+add_action('admin_menu', 'badgeos_themeswitcher_menu');
+
+function badgeos_themeswitcher_menu() {
+    add_options_page('Friends Themeswitcher', 'Friends Themeswitcher', 'manage_options', 'badgeos-custom-themeswitcher', 'badgeos_themeswitcher_options');
+}
+
+function badgeos_themeswitcher_options() {
+    if ( !current_user_can( 'manage_options' ) )  {
+        wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+    }   
+
+    $dma_portal_theme = get_option('dma_portal_theme');
+    $dma_kiosk_theme = get_option('dma_kiosk_theme');
+
+    if (isset($_POST['dma_portal_theme']) && isset($_POST['dma_kiosk_theme'])) {
+        $dma_portal_theme = $_POST['dma_portal_theme'];
+        $dma_kiosk_theme = $_POST['dma_kiosk_theme'];
+        update_option('dma_portal_theme', $dma_portal_theme);
+        update_option('dma_kiosk_theme', $dma_kiosk_theme); 
+?>
+<div class="updated"><p><strong><?php _e('settings saved.', 'menu-test' ); ?></strong></p></div>
+<?php
+    }
+
+    $themes = wp_get_themes();
+    foreach($themes as $name => $theme) {
+        $options[$name] = $theme->name;
+    }
+
+?>
+<form name="badgeos-settings" method="POST" action="">
+    <p> 
+        <?php _e("Portal Theme:", 'dma-portal-theme' ); ?>  
+        <select name="dma_portal_theme">
+            <?php foreach($options as $key => $val) { ?>
+                <option value="<?php print $key; ?>" <?php selected($dma_portal_theme, $key); ?>><?php print $val; ?></option>
+            <?php } ?>
+        </select>
+    </p>
+    <p> 
+        <?php _e("Kiosk Theme:", 'dma-kiosk-theme' ); ?>  
+        <select name="dma_kiosk_theme">
+            <?php foreach($options as $key => $val) { ?>
+                <option value="<?php print $key; ?>" <?php selected($dma_kiosk_theme, $key); ?>><?php print $val; ?></option>
+            <?php } ?>
+        </select>
+    </p>
+
+    <p class="submit">
+        <input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ?>" />
+    </p>
+    
+</form>
+<?php
+}
+
