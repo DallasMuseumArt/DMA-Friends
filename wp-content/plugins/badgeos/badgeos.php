@@ -264,7 +264,7 @@ class BadgeOS {
         $badgeos_settings = get_option( 'badgeos_settings' );
 
         // Set minimum role setting for menus
-        $minimum_role = $badgeos_settings['minimum_role'];
+        $minimum_role = isset($badgeos_settings['minimum_role']) ? $badgeos_settings['minimum_role'] : 'manage_options';
 
         // Create main menu
         add_menu_page( 'BadgeOS', 'BadgeOS', $minimum_role, 'badgeos_badgeos', 'badgeos_settings', $this->directory_url . 'images/badgeos_icon.png', 110 );
@@ -396,7 +396,7 @@ function badgeos_upgrade_2_0() {
         $table->string('site_id')->nullable();
         $table->string('action');
         $table->longText('message');
-        $table->integer('object_id');
+        $table->integer('object_id')->nullable()->default(0);
         $table->integer('points_earned')->default(0);
         $table->integer('total_points')->default(0);
         $table->timestamp('timestamp');
