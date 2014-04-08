@@ -10,7 +10,7 @@ class Just_Field_DatePicker extends Just_Field{
 	 *	draw field on post edit form
 	 *	you can use $this->instance, $this->entry
 	 */
-	function field( $args ) {
+	function field( $args, $instance ) {
 		extract( $args );
 		
 		echo $before_widget;
@@ -34,7 +34,7 @@ class Just_Field_DatePicker extends Just_Field{
 	/**
 	 *	save field on post edit form
 	 */
-	function save( $values ){
+	function save( $values, $instance ){
 		$values = $values['val'];
 		return $values;
 	}

@@ -43,7 +43,7 @@ class BadgeOS_Custom_Authentication {
 	 * @since  1.0
 	 * @return boolean True if user's IP address is inside our specified range, false otherwise
 	 */
-	function is_ip_whitelisted() {
+	public static function is_ip_whitelisted() {
 
 		// Setup our IP range
 		$range_start = ip2long( get_option('dma_iprange_start') );

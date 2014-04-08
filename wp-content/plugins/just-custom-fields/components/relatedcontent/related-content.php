@@ -18,7 +18,7 @@ class Just_Field_RelatedContent extends Just_Field{
 	 *	draw field on post edit form
 	 *	you can use $this->instance, $this->entry
 	 */
-	function field( $args ) {
+	function field( $args, $instance ) {
 		extract( $args );
 		
 		echo $before_widget;
@@ -127,7 +127,7 @@ class Just_Field_RelatedContent extends Just_Field{
 	/**
 	 *	save field on post edit form
 	 */
-	function save( $_values ){
+	function save( $_values , $instance ){
 		$values = array();
 		if(empty($_values)) return $values;
 	

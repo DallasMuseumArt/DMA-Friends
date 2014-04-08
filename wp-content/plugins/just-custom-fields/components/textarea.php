@@ -16,7 +16,7 @@ class Just_Field_Textarea extends Just_Field{
 	 *	draw field on post edit form
 	 *	you can use $this->instance, $this->entry
 	 */
-	function field( $args ) {
+	function field( $args, $instance ) {
 		extract( $args );
 
 		echo $before_widget;
@@ -62,7 +62,7 @@ class Just_Field_Textarea extends Just_Field{
 	/**
 	 *	save field on post edit form
 	 */
-	function save( $values ) {
+	function save( $values, $instance ) {
 		$values = isset($values['val']) ? $values['val'] : '' ;
 		return $values;
 	}

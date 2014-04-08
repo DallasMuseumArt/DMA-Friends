@@ -35,7 +35,8 @@ function dma_user_avatars( $ordered = true ) {
 	// loop through all the files in the plugin's avatars directory and parse the file names
 	foreach ( glob( plugin_dir_path(__FILE__) . 'images/avatars/*.jpg' ) as $file ) {
 		// remove path info
-		$filename   = end( explode( '/', $file ) );
+		$filename   = explode( '/', $file);
+		$filename   = end( $filename );
 
 		// separate text
 		$fileparts  = explode( '-', $filename );

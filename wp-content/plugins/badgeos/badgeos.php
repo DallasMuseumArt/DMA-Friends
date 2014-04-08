@@ -393,12 +393,12 @@ add_action('admin_init', 'badgeos_update');
 function badgeos_upgrade_2_0() {
     Capsule::schema()->create('badgeos_logs', function($table) {
         $table->increments('id');
-        $table->string('site_id');
+        $table->string('site_id')->nullable();
         $table->string('action');
         $table->longText('message');
         $table->integer('object_id');
-        $table->integer('points_earned');
-        $table->integer('total_points');
+        $table->integer('points_earned')->default(0);
+        $table->integer('total_points')->default(0);
         $table->timestamp('timestamp');
         $table->string('timezone');
         $table->integer('user_id');

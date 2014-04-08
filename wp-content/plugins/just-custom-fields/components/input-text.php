@@ -32,7 +32,7 @@ class Just_Field_Input extends Just_Field{
 	/**
 	 *	save field on post edit form
 	 */
-	function save( $values ){
+	function save( $values, $instance ){
 		$values = $values['val'];
 		return $values;
 	}
