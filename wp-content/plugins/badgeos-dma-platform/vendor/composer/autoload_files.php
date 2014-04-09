@@ -7,4 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     $baseDir . '/cli-functions.php',
+    $baseDir . '/admin-functions.php',
 );

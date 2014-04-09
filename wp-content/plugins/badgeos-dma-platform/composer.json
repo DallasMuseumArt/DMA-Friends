@@ -1,6 +1,9 @@
 {
     "autoload": {
         "psr-4": {"DMA\\": "includes/"},
-        "files": [ "cli-functions.php" ]
+        "files": [ "cli-functions.php", "admin-functions.php" ]
+    },
+    "require": {
+        "ruflin/Elastica": "dev-master"
     }
 }
