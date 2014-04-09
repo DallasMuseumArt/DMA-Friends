@@ -10,7 +10,7 @@
 function dma_set_current_location_id( $location_id = 0 ) {
 
 	// Start a new session if one isn't set
-	if ( empty( $_SESSION ) )
+	if ( session_status() == PHP_SESSION_NONE )
 		session_start();
 
 	// Set the passed ID to our current location ID
@@ -39,7 +39,7 @@ function dma_set_current_location_id( $location_id = 0 ) {
 function dma_get_current_location_id() {
 
 	// Start a new session if one isn't set
-	if ( empty( $_SESSION ) )
+	if ( session_status() == PHP_SESSION_NONE )
 		session_start();
 
 	// Fallback: Use the WP_Session class if available
