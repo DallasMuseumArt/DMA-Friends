@@ -337,7 +337,7 @@ register_activation_hook( __FILE__, array( 'DMA', 'install' ) );
  */
 function dma_badgeos_settings() {
     $badgeos_settings = get_option( 'badgeos_settings' );
-    if ( $badgeos_settings != 'DMA\DmaLog') {
+    if ( $badgeos_settings['log_factory'] != 'DMA\DmaLog') {
         $badgeos_settings['log_factory'] = 'DMA\DmaLog';
         update_option( 'badgeos_settings', $badgeos_settings );
     }   
