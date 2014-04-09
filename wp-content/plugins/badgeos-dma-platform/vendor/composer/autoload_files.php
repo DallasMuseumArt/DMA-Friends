@@ -6,6 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    $baseDir . '/cli-functions.php',
-    $baseDir . '/admin-functions.php',
+    $baseDir . '/includes/cli-functions.php',
+    $baseDir . '/includes/admin-functions.php',
 );
