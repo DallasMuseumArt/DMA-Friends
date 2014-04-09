@@ -10,14 +10,18 @@ function badgeos_dma_options() {
         wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
     }   
 
+    $rewards_email          = get_option('rewards_email');
     $elastic_search         = get_option('elastic_search');
     $elastic_search_host    = get_option('elastic_search_host');
     $elastic_search_port    = get_option('elastic_search_port');
 
-    if (isset($_POST['elastic_search_host']) && isset($_POST['elastic_search_port'])) {
+    if (!empty($_POST)) {
+        $rewards_email          = $_POST['rewards_email'];
         $elastic_search         = $_POST['elastic_search'];
         $elastic_search_host    = $_POST['elastic_search_host'];
         $elastic_search_port    = $_POST['elastic_search_port'];
+
+        update_option('rewards_email', $rewards_email);
         update_option('elastic_search', $elastic_search);
         update_option('elastic_search_host', $elastic_search_host);
         update_option('elastic_search_port', $elastic_search_port); 
@@ -28,6 +32,9 @@ function badgeos_dma_options() {
 
 ?>
 <form name="badgeos-settings" method="POST" action="">
+    <p>
+        <?php _e("Rewards Email", 'rewards_email'); ?>
+        <input type="text" name="rewards_email" value="<?php echo $rewards_email; ?>">
     <p>
         <?php _e("Use Elastic Search", 'elastic_search'); ?>
         <input type="checkbox" name="elastic_search" value="1" <?php if ($elastic_search) echo "checked=1"; ?>>

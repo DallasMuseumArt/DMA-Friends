@@ -30,6 +30,12 @@ function dma_send_reward_email( $user_id = 0, $reward_id = 0 ) {
 		
 		if ( is_email( $user_email ) ) {
 
+            // Send email to admin staff
+            $rewards_email = get_option('rewards_email');
+            if (!empty($rewards_email)) {
+			    wp_mail( $rewards_email, $subject, $reward_email_text, $headers );
+            }
+                
 			//send the email
 			wp_mail( $user_email, $subject, $reward_email_text, $headers );
 			
