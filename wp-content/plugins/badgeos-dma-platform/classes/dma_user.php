@@ -445,13 +445,14 @@ class DMA_User extends DMA_Base {
 	 * @return mixed  String of concatenated output or null if user has no logged activities
 	 */
 	function activity_stream() {
-		global $wpdb;
 
 		// Assume we have nothing to output
 		$output = '';
 
-        $activities = LogEntry::where('user_id', '=', $this->ID)->orderBy('timestamp', 'desc')->take(20)->get();
-error_log(print_r($activities, true));
+        $activities = LogEntry::where('user_id', '=', $this->ID)
+            ->orderBy('timestamp', 'desc')
+            ->take(20)
+            ->get();
 
 		// If we have activities, generate our output
 		if ( ! empty( $activities ) ) {
@@ -509,7 +510,6 @@ error_log(print_r($activities, true));
 
 						// Otherwise, this is a normal activity
 						} else {
-error_log(print_r($activity, true));
 							$output .= $this->build_stream_item( array(
 								'title' => get_the_title( $activity->object_id ),
 								'time'  => $activity->timestamp,
@@ -557,7 +557,6 @@ error_log(print_r($activity, true));
 			'time'  => '',
 		) );
 		extract( $args );
-error_log(print_r($args, true));
 
 		$output = '<div class="stream stream-'. $type .'">';
 			$output .= '<div class="desc icon-'. $icon .'">'. $label .': <span>'. $title .'</span></div>';
