@@ -2,8 +2,8 @@
 /**
 * Retrieve all Rewards available for a specific user
 *
-* @param  string $user_id  ID of the user.  Defaults to logged in user if not passed
-* @return array            All Reward posts found
+* @param  string $user_id  ID of the user.	Defaults to logged in user if not passed
+* @return array			   All Reward posts found
 */
 function dma_get_available_rewards_for_user( $user_id = null ) {
 
@@ -23,22 +23,22 @@ function dma_get_available_rewards_for_user( $user_id = null ) {
 		// Query all published, non-hidden rewards
 		// NOTE: As of 1/17 we no longer restrict based on user's points
 		$args = array(
-			'post_type'      =>	'badgeos-rewards',
-			'post_status'    =>	'publish',
+			'post_type'		 =>	'badgeos-rewards',
+			'post_status'	 =>	'publish',
 			'posts_per_page' => -1,
-			'post_status'    => 'publish',
+			'post_status'	 => 'publish',
 			'no_found_rows'  => true,
-			'meta_query'     =>	array(
+			'meta_query'	 =>	array(
 				array(
-					'key'     => '_dma_reward_hidden',
+					'key'	  => '_dma_reward_hidden',
 					'value'   => 'on',
 					'compare' => 'NOT EXISTS'
 				),
 				// array(
-				// 	'key'     => '_dma_reward_points',
-				// 	'value'   => array( 0, $user_points ),
-				// 	'type'    =>	'numeric',
-				// 	'compare' => 'BETWEEN'
+				//	'key'	  => '_dma_reward_points',
+				//	'value'   => array( 0, $user_points ),
+				//	'type'	  =>	'numeric',
+				//	'compare' => 'BETWEEN'
 				// )
 			)
 		);
@@ -59,6 +59,9 @@ function dma_get_available_rewards_for_user( $user_id = null ) {
 	while ( $rewards_query->have_posts() ) : $rewards_query->the_post();
 
 		global $post;
+
+		$reward = new StdClass;
+
 		//verify user has prereqisite badges if any are attached to this reward
 		if ( dma_rewards_user_has_prereqs( $user_id, get_the_ID() ) ) {
 
@@ -124,7 +127,7 @@ function dma_get_available_rewards_for_user( $user_id = null ) {
 
 function dma_sort_reward_points( $a, $b ) {
 
-    return $a->points - $b->points;
+	return $a->points - $b->points;
 
 }
 
@@ -132,7 +135,7 @@ function dma_sort_reward_points( $a, $b ) {
 * Returns the inventory level for a Reward
 *
 * @param  string $reward_id  ID of the Reward to get inventory
-* @return string             Inventory level for Reward
+* @return string			 Inventory level for Reward
 */
 function dma_get_reward_inventory( $reward_id = 0 ) {
 
@@ -146,7 +149,7 @@ function dma_get_reward_inventory( $reward_id = 0 ) {
 * Returns the points for a Reward
 *
 * @param  string $reward_id  ID of the Reward to get inventory
-* @return string             Points required to redeem the Reward
+* @return string			 Points required to redeem the Reward
 */
 function dma_get_reward_points( $reward_id = 0 ) {
 
@@ -159,9 +162,9 @@ function dma_get_reward_points( $reward_id = 0 ) {
 /**
 * Redeem Reward function
 *
-* @param  string $user_id    ID of the user redeeming the reward
+* @param  string $user_id	 ID of the user redeeming the reward
 * @param  string $reward_id  ID of the Reward being redeemed
-* @return string             Points required to redeem the Reward
+* @return string			 Points required to redeem the Reward
 */
 function dma_redeem_reward( $user_id = null, $reward_id = null ) {
 
@@ -205,8 +208,8 @@ function dma_redeem_reward( $user_id = null, $reward_id = null ) {
 /**
 * Return users Rewards
 *
-* @param  string $user_id    ID of the user
-* @return array              Rewards redeemed by the user
+* @param  string $user_id	 ID of the user
+* @return array				 Rewards redeemed by the user
 */
 function dma_get_user_rewards( $user_id = 0 ) {
 
@@ -248,7 +251,7 @@ function dma_deduct_reward_inventory( $reward_id = 0 ) {
 * Generates claim Reward form
 *
 * @param  string $reward_id		ID of the reward
-* @return string                HTML form to redeem this Reward
+* @return string				HTML form to redeem this Reward
 */
 function dma_claim_reward_form( $reward_id = 0 ) {
 
@@ -374,7 +377,7 @@ add_action( 'untrash_post', 'dma_rewards_cache_buster' );
  * Cache buster to delete a user's activity stream cache
  *
  * @since  2.0.0
- * @param  integer   $user_id The given user's ID
+ * @param  integer	 $user_id The given user's ID
  */
 function dma_reward_bust_activity_cache( $user_id = 0 ) {
 	delete_transient( "dma_user_{$user_id}_activity_stream" );

@@ -1,5 +1,6 @@
 {
     "autoload": {
-        "psr-4": {"DMA\\": "includes/"}
+        "psr-4": {"DMA\\": "includes/"},
+        "files": [ "cli-functions.php" ]
     }
 }

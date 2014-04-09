@@ -377,12 +377,10 @@ function badgeos_is_debug_mode() {
 function badgeos_update() {
     $active_version = get_option( 'badgeos_active_version', 0);
 
-    if ( version_compare( $active_version, BadgeOS::$version, '<' ) ) {
-        if ( version_compare( $active_version, 2.0, '<' ) ) {
-            update_option('badgeos_active_version', 2.0);
-            badgeos_upgrade_2_0();
-        }
-    } 
+    if (!Capsule::schema()->hasTable('badgeos_logs')) {
+        badgeos_upgrade_2_0();
+    }
+        
 }
 
 add_action('admin_init', 'badgeos_update');
@@ -396,14 +394,14 @@ function badgeos_upgrade_2_0() {
         $table->string('site_id')->nullable();
         $table->string('action');
         $table->longText('message');
-        $table->integer('object_id')->nullable()->default(0);
-        $table->integer('points_earned')->default(0);
-        $table->integer('total_points')->default(0);
+        $table->integer('object_id')->default(0)->nullable();
+        $table->integer('points_earned')->default(0)->nullable();
+        $table->integer('total_points')->default(0)->nullable();
         $table->timestamp('timestamp');
         $table->string('timezone');
         $table->integer('user_id');
         $table->timestamp('user_registered');
-        $table->string('zip');
+        $table->string('zip')->nullable();
     });
-    
+
 }
