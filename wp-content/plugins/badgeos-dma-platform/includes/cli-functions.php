@@ -31,7 +31,7 @@ class DMA_CLI_Command extends WP_CLI_Command {
 
     function remove_old_logs() {
         Capsule::transaction(function() {
-            $posts = Capsule::table('posts')->where('post_type', '=', 'badgestack-log-entry')->get();
+            $posts = Capsule::table('posts')->where('post_type', '=', 'badgeos-log-entry')->get();
             $count = count($posts);
         
             foreach($posts as $post) {
