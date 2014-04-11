@@ -42,6 +42,29 @@ class DMA_CLI_Command extends WP_CLI_Command {
             WP_CLI::success('Successfully deleted ' . $count . ' logs');
         });
     }
+
+    function verify_logs() {
+        $activities = Capsule::table('dma_activity_stream');
+        $logs = Capsule::table('dma_log_entries');
+
+        $a = $activities->take(50)->get();
+
+        foreach ($a as $aa) {
+            $l = $logs
+                ->where('user_id', '=', $aa['user_id'])
+                ->where('object_id', '=', $aa['object_id'])
+                ->where('action', '=', $aa['action'])
+                ->get();
+            if (!empty($l)) {
+                $l = array_pop($l);
+                WP_CLI::success('LOG: ' . $l['timestamp'] . ' >> ACTIVITY: ' . $aa['timestamp']);
+            }
+var_dump($aa);
+var_dump($l);
+echo '----------------------';
+        }
+
+    }
 }
 
 WP_CLI::add_command( 'dma', 'DMA_CLI_Command' );
