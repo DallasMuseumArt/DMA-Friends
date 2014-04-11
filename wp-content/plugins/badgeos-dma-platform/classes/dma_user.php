@@ -449,7 +449,7 @@ class DMA_User extends DMA_Base {
 		// Assume we have nothing to output
 		$output = '';
 
-        $activities = LogEntry::where('user_id', '=', $this->ID)
+        $activities = LogEntry::user($this->ID)
             ->orderBy('timestamp', 'desc')
             ->take(20)
             ->get();
