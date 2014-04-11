@@ -1,5 +1,7 @@
 <?php
 
+use BadgeOS\LogEntry;
+
 /**
  * Create a new DMA checkin.
  *
@@ -272,23 +274,13 @@ function dma_find_user_checkins_for_step( $user_id, $step_id ) {
 		$since = 0;
 
 	// Get our relevant activity/event post IDs
-	$relevant_activities = join( ',', dma_find_relevant_activity_for_step( $step_id ) );
+	$relevant_activities = dma_find_relevant_activity_for_step( $step_id );
 
 	// Get all relevant activity logged by a user
-	$checkins = $wpdb->get_results(
-		$wpdb->prepare(
-			"
-			SELECT ID
-			FROM   {$wpdb->prefix}dma_activity_stream
-			WHERE  action = 'activity'
-			       AND user_id = %d
-			       AND object_id IN ({$relevant_activities})
-			       AND timestamp >= %s
-			",
-			$user_id,
-			gmdate( 'Y-m-d H:i:s', $since )
-		)
-	);
+    $checkins = LogEntry::where('user_id', $user_id)
+        ->whereIn('object_id', $relevant_activities)
+        ->where('timestamp', '>=', gmdate( 'Y-m-d H:i:s', $since ))
+        ->get();
 
 	// If the user is already working on the step's badge...
 	if ( $active_achievement = badgeos_user_get_active_achievement( $user_id, $parent_achievement->ID ) ) {
