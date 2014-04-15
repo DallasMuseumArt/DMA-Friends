@@ -21,6 +21,10 @@ class DMA_CLI_Command extends WP_CLI_Command {
                 $log_entry['points_earned'] = $log_entry['awarded_points'];
                 $log->write($title, $log_entry);
 
+                if (!empty($log_entry['artwork_id'])) {
+                    badgeos_post_log_entry( $log_entry['artwork_id'], $log_entry['user_id'], 'liked-artwork', "{$log_entry['user_id']} liked the work of art {$log_entry['artwork_id']}" );
+                }
+
                 echo '.';
             }   
         
@@ -43,28 +47,6 @@ class DMA_CLI_Command extends WP_CLI_Command {
         });
     }
 
-    function verify_logs() {
-        $activities = Capsule::table('dma_activity_stream');
-        $logs = Capsule::table('dma_log_entries');
-
-        $a = $activities->take(50)->get();
-
-        foreach ($a as $aa) {
-            $l = $logs
-                ->where('user_id', '=', $aa['user_id'])
-                ->where('object_id', '=', $aa['object_id'])
-                ->where('action', '=', $aa['action'])
-                ->get();
-            if (!empty($l)) {
-                $l = array_pop($l);
-                WP_CLI::success('LOG: ' . $l['timestamp'] . ' >> ACTIVITY: ' . $aa['timestamp']);
-            }
-var_dump($aa);
-var_dump($l);
-echo '----------------------';
-        }
-
-    }
 }
 
 WP_CLI::add_command( 'dma', 'DMA_CLI_Command' );
