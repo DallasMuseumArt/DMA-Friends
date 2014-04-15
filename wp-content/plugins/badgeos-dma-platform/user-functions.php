@@ -597,7 +597,7 @@ function dma_log_user_login( $user_id ) {
 
 	// Log the user's checkin if they're at a kiosk location
 	if ( $location )
-		badgeos_post_log_entry( $location->ID, $user_id, null, "$userdata->user_login checked-in at $location->post_title" );
+		badgeos_post_log_entry( $location->ID, $user_id, 'checkin', "$userdata->user_login checked-in at $location->post_title" );
 
 }
 add_action( 'user_authenticated', 'dma_log_user_login' );

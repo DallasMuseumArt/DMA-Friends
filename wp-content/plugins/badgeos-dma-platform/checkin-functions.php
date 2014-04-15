@@ -53,13 +53,17 @@ function dma_create_checkin( $user_id = 0, $activity_id = 0, $date = NULL, $loca
 	if ( ! $is_admin && dma_is_checkin_outside_time_restrictions( $activity_id ) )
 		return false;
 
-    // If we are sent an accession id then also log that the user liked a work of art
-    if (!empty($accession_id)) {
-        badgeos_post_log_entry( $artwork_id, $user_id, 'liked-artwork', "{$user_id} liked the work of art {$accession_id}" );
-    }
+    // If we're dealing with "liked a work of art",
+    // set our artwork_id based on the accession code
+    $artwork_id = ( ARTWORK_OBJECT_ID == $activity_id ) ? $accession_id : null;
 
-	// Log this check-in
-    $checked_in = badgeos_post_log_entry( $activity_id, $user_id, 'activity', "{$user_id} just checked-in using code {$accession_id}" );
+    if ($artwork_id) {
+        // If we are sent an accession id then also log that the user liked a work of art
+        badgeos_post_log_entry( $artwork_id, $user_id, 'artwork', "{$user_id} liked the work of art {$artwork_id}" );
+    } else {
+	    // Log this check-in
+        $checked_in = badgeos_post_log_entry( $activity_id, $user_id, 'activity', "{$user_id} just checked-in using code {$accession_id}" );
+    }
 
     // Find all steps associated to the activity and remove the cache
     $steps = $wpdb->get_results(

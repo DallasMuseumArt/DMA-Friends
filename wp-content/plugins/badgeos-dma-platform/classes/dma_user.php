@@ -479,7 +479,7 @@ class DMA_User extends DMA_Base {
 							) );
 						}
 						break;
-					case 'claimed-reward' :
+					case 'reward' :
 						$output .= $this->build_stream_item( array(
 							'label' => __( 'You claimed a reward' , 'dma' ),
 							'title' => get_the_title( $activity->object_id ),
@@ -488,7 +488,7 @@ class DMA_User extends DMA_Base {
 							'time'  => $activity->timestamp,
 						) );
 						break;
-					case 'checked-in' :
+					case 'checkin' :
 						$output .= $this->build_stream_item( array(
 							'label' => __( 'You checked in at' , 'dma' ),
 							'title' => get_the_title( $activity->object_id ),
