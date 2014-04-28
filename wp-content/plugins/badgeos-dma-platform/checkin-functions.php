@@ -282,10 +282,13 @@ function dma_find_user_checkins_for_step( $user_id, $step_id ) {
 	$relevant_activities = dma_find_relevant_activity_for_step( $step_id );
 
 	// Get all relevant activity logged by a user
+/*** TODO make more performant
     $checkins = LogEntry::user($user_id)
         ->whereIn('object_id', $relevant_activities)
         ->where('timestamp', '>=', gmdate( 'Y-m-d H:i:s', $since ))
         ->get();
+*/
+    $checkins = array();
 
 	// If the user is already working on the step's badge...
 	if ( $active_achievement = badgeos_user_get_active_achievement( $user_id, $parent_achievement->ID ) ) {
@@ -293,7 +296,7 @@ function dma_find_user_checkins_for_step( $user_id, $step_id ) {
 		// If we have any already used check-ins,
 		// exclude them from our relevant check-in array
 		if ( isset( $active_achievement->used_checkins ) ) {
-			$checkins = array_udiff( $checkins, $active_achievement->used_checkins, 'dma_compare_checkins' );
+			$checkins = array_udiff( (array) $checkins, $active_achievement->used_checkins, 'dma_compare_checkins' );
 		}
 	}
 
