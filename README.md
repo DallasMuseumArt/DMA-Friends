@@ -10,11 +10,13 @@ Badges and Rewards to enhance the visitor experience.
 1. Download the latest version of friends via git
 ```
 git clone https://github.com/DallasMuseumArt/DMA-Friends.git
+cd DMA-Friends
+git submodule update
 ```
 
 2. Change directory to themes
 ```
-cd DMA-Friends/wp-content/themes
+cd wp-content/themes
 ```
 
 3. Download a copy of the base themes
