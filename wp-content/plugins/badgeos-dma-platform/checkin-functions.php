@@ -263,6 +263,18 @@ function dma_find_relevant_activity_for_step( $step_id = 0 ) {
  */
 function dma_find_user_checkins_for_step( $user_id, $step_id ) {
 	global $wpdb;
+    static $count;
+
+    // The following reduces overhead for new users.
+    // because the query can be expensive for each badge first
+    // do a look up to see if the user has completed any activities
+    // if the user has not, then its new so store the variable in a
+    // static and look up against that for each additional badge
+    if ($count === 0) {
+        return array();
+    } elseif ($count === NULL) {
+        $count = count(LogEntry::user($user_id)->where('action', '=', 'activity')->get());
+    }
 
     // Check for cached data first
     $cache_key = 'dma_checkin_steps_' . $user_id . ':' . $step_id;
