@@ -32,8 +32,12 @@ function dma_send_reward_email( $user_id = 0, $reward_id = 0 ) {
 
             // Send email to admin staff
             $rewards_email = get_option('rewards_email');
+    
+            $admin_email_text = $user_email . ' has redeemed the reward for "' . $reward_title . '"';
+            $admin_email_text .= "\nThe following email was sent to the user:\n\n" . $reward_email_text;
+
             if (!empty($rewards_email)) {
-			    wp_mail( $rewards_email, $subject, $reward_email_text, $headers );
+			    wp_mail( $rewards_email, $subject, $admin_email_text, $headers );
             }
                 
 			//send the email

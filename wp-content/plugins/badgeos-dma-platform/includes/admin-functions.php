@@ -35,9 +35,11 @@ function badgeos_dma_options() {
     <p>
         <?php _e("Rewards Email", 'rewards_email'); ?>
         <input type="text" name="rewards_email" value="<?php echo $rewards_email; ?>">
+    </p>
     <p>
         <?php _e("Use Elastic Search", 'elastic_search'); ?>
         <input type="checkbox" name="elastic_search" value="1" <?php if ($elastic_search) echo "checked=1"; ?>>
+    </p>
     <p> 
         <?php _e("Elastic Search Host:", 'elastic_search_host' ); ?>  
         <input type="text" name="elastic_search_host" value="<?php echo $elastic_search_host; ?>">
