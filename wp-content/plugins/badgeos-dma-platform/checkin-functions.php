@@ -59,7 +59,7 @@ function dma_create_checkin( $user_id = 0, $activity_id = 0, $date = NULL, $loca
 
     if ($artwork_id) {
         // If we are sent an accession id then also log that the user liked a work of art
-        badgeos_post_log_entry( $artwork_id, $user_id, 'artwork', "{$user_id} liked the work of art {$artwork_id}" );
+        $checked_in = badgeos_post_log_entry( $artwork_id, $user_id, 'artwork', "{$user_id} liked the work of art {$artwork_id}" );
     } else {
 	    // Log this check-in
         $checked_in = badgeos_post_log_entry( $activity_id, $user_id, 'activity', "{$user_id} just checked-in using code {$accession_id}" );
