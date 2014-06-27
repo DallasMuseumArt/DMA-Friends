@@ -317,7 +317,7 @@ class DMA_Badge extends DMA_Base {
 					$output .= '<p class="expires">';
 						$output .= '<span class="warning icon-attention"></span>';
 						$output .= __( 'Available through', 'dma' );
-						$output .= '<span class="date"> ' . date_i18n( 'F j, Y' ,strtotime( $this->expires ) ) . '</span>';
+						$output .= '<span class="date"> ' . date_i18n( 'F j, Y' , $this->expires ) . '</span>';
 					$output .= '</p>';
 				}
 
