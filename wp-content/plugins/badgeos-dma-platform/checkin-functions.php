@@ -299,6 +299,7 @@ function dma_find_user_checkins_for_step( $user_id, $step_id ) {
         ->where('timestamp', '>=', gmdate( 'Y-m-d H:i:s', $since ))
         ->get();
 
+/** Disable for now.  what exactly is this section doing?  do we need it?
 	// If the user is already working on the step's badge...
 	if ( $active_achievement = badgeos_user_get_active_achievement( $user_id, $parent_achievement->ID ) ) {
 
@@ -308,6 +309,7 @@ function dma_find_user_checkins_for_step( $user_id, $step_id ) {
 			$checkins = array_udiff( (array) $checkins, $active_achievement->used_checkins, 'dma_compare_checkins' );
 		}
 	}
+*/
 
     // Build cache
     set_transient($cache_key, $checkins, YEAR_IN_SECONDS);
