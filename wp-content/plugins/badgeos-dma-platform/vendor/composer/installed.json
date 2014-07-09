@@ -6,12 +6,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/ruflin/Elastica.git",
-            "reference": "b610d4f6afabc5a917eaa754729e53030d203040"
+            "reference": "83fd5c4ce3fff5adf2a3172d56bd587f1b0e9a39"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/ruflin/Elastica/zipball/b610d4f6afabc5a917eaa754729e53030d203040",
-            "reference": "b610d4f6afabc5a917eaa754729e53030d203040",
+            "url": "https://api.github.com/repos/ruflin/Elastica/zipball/83fd5c4ce3fff5adf2a3172d56bd587f1b0e9a39",
+            "reference": "83fd5c4ce3fff5adf2a3172d56bd587f1b0e9a39",
             "shasum": ""
         },
         "require": {
@@ -19,15 +19,17 @@
         },
         "require-dev": {
             "munkie/elasticsearch-thrift-php": "1.4.*",
+            "phpunit/phpunit": "4.1.*",
             "psr/log": "~1.0",
             "satooshi/php-coveralls": "dev-master"
         },
         "suggest": {
+            "guzzlehttp/guzzle": "Allow using guzzle 4.x as the http transport (requires php 5.4)",
             "monolog/monolog": "Logging request",
             "munkie/elasticsearch-thrift-php": "Allow using thrift transport",
             "psr/log": "for logging"
         },
-        "time": "2014-04-08 04:26:58",
+        "time": "2014-05-25 18:00:12",
         "type": "library",
         "installation-source": "source",
         "autoload": {

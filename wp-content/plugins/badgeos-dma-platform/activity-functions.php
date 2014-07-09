@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Database\Capsule\Manager as Capsule;
+
 /**
  * Get an activity's post ID from a given Accession ID
  *
@@ -76,21 +78,12 @@ function dma_is_activity_locked_for_user( $user_id, $activity_id = 0 ) {
 		global $wpdb;
 
 		// Get posts connected to this activity id, created by this user, since our lockout limit
-		$activities_logged = $wpdb->get_results(
-			$wpdb->prepare(
-				"
-				SELECT *
-				FROM   {$wpdb->prefix}dma_activity_stream
-				WHERE  action = 'activity'
-				       AND user_id = %d
-				       AND object_id = %d
-				       AND timestamp >= %s
-				",
-				$user_id,
-				$activity_id,
-				gmdate( 'Y-m-d H:i:s', $since )
-			)
-		);
+        $activities_logged = Capsule::table('badgeos_logs')
+            ->where('action', '=', 'activity')
+            ->where('user_id', '=', $user_id)
+            ->where('object_id', '=', $activity_id)
+            ->where('timestamp', '>=', gmdate( 'Y-m-d H:i:s', $since ))
+            ->get();
 
 		// If we have any posts, the user is locked out
 		if ( $activities_logged )

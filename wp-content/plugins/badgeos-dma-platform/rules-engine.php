@@ -91,7 +91,7 @@ function dma_user_deserves_step( $return = true, $user_id = 0, $step_id = 0 ) {
 
 	// If we deserve the step, log our used check-ins
 	if ( true == $return ) {
-		$used_checkins = array_slice( $relevant_checkins, 0 , $required_number_of_checkins );
+		$used_checkins = array_slice( (array) $relevant_checkins, 0 , $required_number_of_checkins );
 		dma_user_update_active_achievement_checkins( $user_id, $parent_achievement->ID, $used_checkins );
 	}
 

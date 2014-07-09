@@ -59,7 +59,7 @@ function dma_create_checkin( $user_id = 0, $activity_id = 0, $date = NULL, $loca
 
     if ($artwork_id) {
         // If we are sent an accession id then also log that the user liked a work of art
-        badgeos_post_log_entry( $artwork_id, $user_id, 'artwork', "{$user_id} liked the work of art {$artwork_id}" );
+        $checked_in = badgeos_post_log_entry( $artwork_id, $user_id, 'artwork', "{$user_id} liked the work of art {$artwork_id}" );
     } else {
 	    // Log this check-in
         $checked_in = badgeos_post_log_entry( $activity_id, $user_id, 'activity', "{$user_id} just checked-in using code {$accession_id}" );
@@ -263,6 +263,18 @@ function dma_find_relevant_activity_for_step( $step_id = 0 ) {
  */
 function dma_find_user_checkins_for_step( $user_id, $step_id ) {
 	global $wpdb;
+    static $count;
+
+    // The following reduces overhead for new users.
+    // because the query can be expensive for each badge first
+    // do a look up to see if the user has completed any activities
+    // if the user has not, then its new so store the variable in a
+    // static and look up against that for each additional badge
+    if ($count === 0) {
+        return array();
+    } elseif ($count === NULL) {
+        $count = count(LogEntry::user($user_id)->where('action', '=', 'activity')->get());
+    }
 
     // Check for cached data first
     $cache_key = 'dma_checkin_steps_' . $user_id . ':' . $step_id;
@@ -287,15 +299,17 @@ function dma_find_user_checkins_for_step( $user_id, $step_id ) {
         ->where('timestamp', '>=', gmdate( 'Y-m-d H:i:s', $since ))
         ->get();
 
+/** Disable for now.  what exactly is this section doing?  do we need it?
 	// If the user is already working on the step's badge...
 	if ( $active_achievement = badgeos_user_get_active_achievement( $user_id, $parent_achievement->ID ) ) {
 
 		// If we have any already used check-ins,
 		// exclude them from our relevant check-in array
 		if ( isset( $active_achievement->used_checkins ) ) {
-			$checkins = array_udiff( $checkins, $active_achievement->used_checkins, 'dma_compare_checkins' );
+			$checkins = array_udiff( (array) $checkins, $active_achievement->used_checkins, 'dma_compare_checkins' );
 		}
 	}
+*/
 
     // Build cache
     set_transient($cache_key, $checkins, YEAR_IN_SECONDS);

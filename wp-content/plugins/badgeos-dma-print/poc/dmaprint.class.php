@@ -39,7 +39,8 @@ date_default_timezone_set('UTC');
 	
 	function __construct($name, $number, $printer)
 	{
-		parent::__construct(70,150,"L");
+		//parent::__construct(70,150,"L");
+        parent::__construct(80,80,"P");
 		$this->name = $name;
 		$this->number = $number;
 		$this->printer = $printer;
