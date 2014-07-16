@@ -247,6 +247,9 @@ function dma_find_relevant_activity_for_step( $step_id = 0 ) {
 				) );
 			}
 			break;
+        case 'specific-achievement':
+            $activity_ids = array($requirements['achievement_post']);
+            break;
 		default :
 			break;
 	}
