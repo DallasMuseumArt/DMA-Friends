@@ -47,11 +47,11 @@ if(is_admin()) {
 
 			$iusib_add = "";
 			// the escaped query string
-			$qstr = mysql_real_escape_string($_GET["s"]);
+			$qstr = $_GET["s"];
 			
 			// add all custom fields into the query
 			if(!empty($iusib_cma)) {
-				$iusib_add = " OR meta_key='".implode("' OR meta_key='",$wpdb->escape($iusib_cma))."'";
+				$iusib_add = " OR meta_key='".implode("' OR meta_key='",$iusib_cma)."'";
 			}
 
             $usermeta_affected_ids = $wpdb->get_results("SELECT DISTINCT user_id FROM $wpdb->usermeta WHERE (meta_key='first_name' OR meta_key='last_name'".$iusib_add.") AND LOWER(meta_value) LIKE '%".$qstr."%'");
