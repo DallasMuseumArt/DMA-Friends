@@ -296,11 +296,13 @@ function dma_find_user_checkins_for_step( $user_id, $step_id ) {
 	// Get our relevant activity/event post IDs
 	$relevant_activities = dma_find_relevant_activity_for_step( $step_id );
 
-	// Get all relevant activity logged by a user
-    $checkins = LogEntry::user($user_id)
-        ->whereIn('object_id', $relevant_activities)
-        ->where('timestamp', '>=', gmdate( 'Y-m-d H:i:s', $since ))
-        ->get();
+    if (!empty($relevant_activities)) {
+	    // Get all relevant activity logged by a user
+        $checkins = LogEntry::user($user_id)
+            ->whereIn('object_id', $relevant_activities)
+            ->where('timestamp', '>=', gmdate( 'Y-m-d H:i:s', $since ))
+            ->get();
+    }
 
 /** Disable for now.  what exactly is this section doing?  do we need it?
 	// If the user is already working on the step's badge...
