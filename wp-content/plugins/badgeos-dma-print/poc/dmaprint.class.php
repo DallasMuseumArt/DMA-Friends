@@ -27,8 +27,8 @@ date_default_timezone_set('UTC');
 	{
 		$fn = "/tmp/" . md5(date("Y-m-d-h-i-s-u")) . ".pdf";
 		$this->pdf->Output($fn, "F");
-		system("lp -d " . $this->printer . " " . $fn);
-		unlink($fn);
+		exec("lp -d " . $this->printer . " " . $fn);
+		@unlink($fn);
 	}
 	
  }
