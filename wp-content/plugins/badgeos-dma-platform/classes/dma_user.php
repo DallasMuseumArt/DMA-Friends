@@ -289,6 +289,7 @@ class DMA_User extends DMA_Base {
 				case 'email_optin' :
 				case 'credly_user_enable' :
 					$value = ( ! empty( $value ) ? 'true' : 'false' );
+
 				default:
 					dma_update_user_data( $this->ID, $field_name, $value );
 					break;
@@ -297,6 +298,13 @@ class DMA_User extends DMA_Base {
 
 		// Action for handling other events when a profile is saved
 		do_action( 'dma_save_profile', $this->ID, $_REQUEST );
+
+        // Honor user settings for mailing lists
+        if ($_REQUEST['email_optin'] == 'on') {
+            AC_OnUpdateUser( $this->ID, $this);
+        } else {
+            AC_OnDeleteUser( $this->ID );
+        }
 
 		// Finally, setup new user object to reflect updated data
 		$GLOBALS['dma_user'] = new DMA_User( $this->ID );
